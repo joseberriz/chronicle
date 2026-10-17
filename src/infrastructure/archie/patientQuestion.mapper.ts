@@ -30,6 +30,7 @@ export interface PatientQuestionRow {
   redFlag: string;
   redFlagReason: string | null;
   matchedAnswerId: string | null;
+  navigatorAlerted: boolean | null;
   askedAt: string;
   createdAt: string;
 }
@@ -113,7 +114,24 @@ export function toPatientQuestion(row: PatientQuestionRow): RepoResult<PatientQu
       'la fila llegó null/undefined donde el schema garantiza un objeto',
     );
   }
-  return requiredColumnAbsent('PatientQuestion', ["navigatorAlerted"]);
+  const redFlag = PATIENT_QUESTION_RED_FLAG_VALUES.find((v) => v === row.redFlag);
+  if (redFlag === undefined) {
+    return wireShapeViolation('PatientQuestion', 'redFlag fuera del enum del wire: ' + String(row.redFlag));
+  }
+  return {
+    ok: true,
+    data: {
+      id: row.id,
+      questionText: row.questionText,
+      patientId: row.patientId,
+      redFlag,
+      ...(row.redFlagReason != null ? { redFlagReason: row.redFlagReason } : {}),
+      ...(row.matchedAnswerId != null ? { matchedAnswerId: row.matchedAnswerId } : {}),
+      navigatorAlerted: row.navigatorAlerted === true,
+      askedAt: row.askedAt,
+      createdAt: row.createdAt,
+    },
+  };
 }
 
 /** `NewPatientQuestion` → el `PatientQuestionCreateInput` real. El tipo de retorno
@@ -124,6 +142,7 @@ export function toPatientQuestionCreateInput(input: NewPatientQuestion): Record<
   const out: Record<string, unknown> = {
   };
   if (input.createdAt !== undefined) out.createdAt = input.createdAt;
+  if (input.navigatorAlerted !== undefined) out.navigatorAlerted = input.navigatorAlerted;
   if (input.redFlagReason !== undefined) out.redFlagReason = input.redFlagReason;
   if (input.askedAt !== undefined) out.askedAt = input.askedAt;
   if (input.questionText !== undefined) out.questionText = input.questionText;
@@ -144,6 +163,7 @@ export function toPatientQuestionCreateInput(input: NewPatientQuestion): Record<
 export function toPatientQuestionUpdateInput(patch: UpdatePatientQuestion): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   if (patch.askedAt !== undefined) out.askedAt = patch.askedAt;
+  if (patch.navigatorAlerted !== undefined) out.navigatorAlerted = patch.navigatorAlerted;
   if (patch.createdAt !== undefined) out.createdAt = patch.createdAt;
   if (patch.matchedAnswerId === null) out.matchedAnswerId = null;
   else if (patch.matchedAnswerId != null && String(patch.matchedAnswerId) !== '') out.matchedAnswerId = patch.matchedAnswerId;
@@ -160,7 +180,8 @@ export function toPatientQuestionUpdateInput(patch: UpdatePatientQuestion): Reco
  *  son las dos superficies donde un nombre de dominio tiene que salir a la consulta;
  *  una propiedad sin columna no aparece, porque no hay nada por lo que filtrar u
  *  ordenar. */
-export const PATIENT_QUESTION_FIELD_MAP: Readonly<Record<'id' | 'questionText' | 'patientId' | 'redFlag' | 'redFlagReason' | 'matchedAnswerId' | 'askedAt' | 'createdAt', string>> = {
+export const PATIENT_QUESTION_FIELD_MAP: Readonly<Record<'id' | 'questionText' | 'patientId' | 'redFlag' | 'redFlagReason' | 'matchedAnswerId' | 'navigatorAlerted' | 'askedAt' | 'createdAt', string>> = {
+  navigatorAlerted: 'navigatorAlerted',
   id: 'id',
   questionText: 'questionText',
   patientId: 'patientId',

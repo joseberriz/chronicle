@@ -17,7 +17,6 @@ import type { Patient } from '../../domain/entities/patient';
 import type { NewPatient, UpdatePatient, PatientQuery } from '../../domain/ports/patient.repository';
 import { wireShapeViolation } from './mapping';
 import { toFloat } from './coerce';
-import { repoError } from './transport';
 
 /** La FILA del wire de `Patient`: lo que el documento selecciona, con la nulabilidad
  *  que el schema declara. No sale de esta capa. */
@@ -33,17 +32,6 @@ export interface PatientRow {
 
 /** Campos obligatorios del prototipo SIN columna en el wire: ninguna fila se puede
  *  leer como dominio. Constante decidida al emitir. */
-function requiredColumnAbsent(entity: string, fields: readonly string[]): RepoResult<never> {
-  return {
-    ok: false,
-    error: repoError(
-      'not-found',
-      entity + ': el prototipo exige ' + fields.join(', ') + ' y el wire no tiene columna para eso',
-      "campo-sin-columna",
-    ),
-  };
-}
-
 /**
  *  Una fila del wire de `Patient` en su tipo de dominio. Devuelve `RepoResult`
  *  porque estrechar un enum PUEDE fallar: un valor fuera de la unión es el
@@ -66,7 +54,20 @@ export function toPatient(row: PatientRow): RepoResult<Patient> {
       'la fila llegó null/undefined donde el schema garantiza un objeto',
     );
   }
-  return requiredColumnAbsent('Patient', ["shareWithCaregiver"]);
+  // No `shareWithCaregiver` column exists: default to the conservative value (not shared).
+  return {
+    ok: true,
+    data: {
+      id: row.id,
+      fullName: row.fullName,
+      dateOfBirth: row.dateOfBirth,
+      primaryDiagnosis: row.primaryDiagnosis,
+      careTeamId: row.careTeamId,
+      ...(row.riskScore != null ? { riskScore: Number(row.riskScore) } : {}),
+      shareWithCaregiver: false,
+      createdAt: row.createdAt,
+    },
+  };
 }
 
 /** `NewPatient` → el `PatientCreateInput` real. El tipo de retorno es la bolsa de

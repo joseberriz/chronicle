@@ -13,7 +13,12 @@ import type { EndorsedAnswer } from '../../domain/entities/endorsedAnswer';
 import type { PatientChatAnswer } from '../../domain/entities/patientChatAnswer';
 import type { PatientQuestion } from '../../domain/entities/patientQuestion';
 import type { DataNotice } from '../../application/view-models/notices';
-import { careChatScreenViewModelAvailability, type CareChatScreenViewModel } from '../../application/view-models/care-chat.vm';
+import {
+  careChatScreenViewModelAvailability,
+  type CareChatScreenViewModel,
+  type CareChatThreadItem,
+} from '../../application/view-models/care-chat.vm';
+import type { PatientQuestionRedFlag } from '../../domain/entities/patientQuestion';
 import { useRepositories } from '../app-context';
 import { CareChatView } from '../views/care-chat.view';
 import { ScreenError, ScreenLoading } from '../screen-state';
@@ -33,6 +38,18 @@ const CLINICIANS_PAGE_SIZE = 25;
 /** Page size of `questions`: requested EXPLICITLY so the view knows how many rows of
  *  how many it sees. */
 const QUESTIONS_PAGE_SIZE = 25;
+
+/** Rule-based safety triage: red-flag symptoms are URGENT, common treatment effects PRIORITY. */
+const URGENT_RE = /(fever|bleed|chest pain|short(ness)? of breath|can't breathe|cannot breathe|faint|confus|seizure|ibuprofen|unable to keep)/i;
+const PRIORITY_RE = /(pain|vomit|rash|swelling|dizz|numb|diarrh|infection)/i;
+
+function triage(text: string): { redFlag: PatientQuestionRedFlag; reason?: string } {
+  const urgent = URGENT_RE.exec(text);
+  if (urgent !== null) return { redFlag: 'URGENT', reason: 'Red-flag term: ' + urgent[0].toLowerCase() };
+  const priority = PRIORITY_RE.exec(text);
+  if (priority !== null) return { redFlag: 'PRIORITY', reason: 'Symptom term: ' + priority[0].toLowerCase() };
+  return { redFlag: 'ROUTINE' };
+}
 
 /** The VIEW of this screen: `(props: <Screen>ViewModel) => JSX`. The view model
  *  travels spread as props. */
@@ -59,10 +76,12 @@ export function CareChatScreenContainer(
   const [cliniciansNotice, setCliniciansNotice] = React.useState<DataNotice | null>(null);
   const [library, setLibrary] = React.useState<readonly EndorsedAnswer[]>([]);
   const [libraryNotice, setLibraryNotice] = React.useState<DataNotice | null>(null);
-  const questions: readonly PatientQuestion[] = [];
-  const questionsTotal = 0;
+  const [questions, setQuestions] = React.useState<readonly PatientQuestion[]>([]);
+  const [questionsTotal, setQuestionsTotal] = React.useState(0);
   const questionsPage = 0;
-  const questionsNotice: DataNotice | null = { code: 'sesion-no-identificada' };
+  const [questionsNotice, setQuestionsNotice] = React.useState<DataNotice | null>(null);
+  const [thread, setThread] = React.useState<readonly CareChatThreadItem[]>([]);
+  const [patientId, setPatientId] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [loadError, setLoadError] = React.useState<RepoError | null>(null);
   const [reloadToken, setReloadToken] = React.useState(0);
@@ -156,6 +175,100 @@ export function CareChatScreenContainer(
     };
   }, [repositories, reloadToken, answersPage, cliniciansPage]);
 
+  // The patient's own thread. Until a login is linked to a patient record, the screen
+  // works on the first patient on file (demo scope).
+  React.useEffect(() => {
+    let live = true;
+    void (async () => {
+      const patients = await repositories.patient.list({ first: 1 });
+      if (!live) return;
+      if (patients === null || patients.ok === false || patients.data.items.length === 0) {
+        setPatientId(null);
+        setQuestionsNotice({ code: 'sesion-no-identificada' });
+        return;
+      }
+      const pid = patients.data.items[0].id;
+      setPatientId(pid);
+      const [qs, ans] = await Promise.all([
+        repositories.patientQuestion.list({
+          first: QUESTIONS_PAGE_SIZE,
+          filter: { patientId: pid },
+          sort: { field: 'askedAt', dir: 'DESC' },
+        }),
+        repositories.patientChatAnswer.listAll(),
+      ]);
+      if (!live) return;
+      if (qs === null || qs.ok === false) {
+        setQuestionsNotice({ code: 'filas-ilegibles' });
+        return;
+      }
+      const approved = new Map<string, string>();
+      if (ans !== null && ans.ok === true) {
+        for (const a of ans.data.items) {
+          if (a.status === 'ENDORSED') approved.set(a.questionId, a.reviewerEdits ?? a.body);
+        }
+      }
+      setQuestions(qs.data.items);
+      setQuestionsTotal(qs.data.total);
+      setQuestionsNotice((qs.data.unreadable ?? 0) > 0 ? { code: 'filas-ilegibles' } : null);
+      setThread(
+        qs.data.items.map((q) => ({
+          id: q.id,
+          questionText: q.questionText,
+          askedAt: q.askedAt,
+          redFlag: q.redFlag,
+          navigatorAlerted: q.navigatorAlerted,
+          answerBody: approved.get(q.id) ?? null,
+        })),
+      );
+    })().catch((cause: unknown) => {
+      console.error('[archie] care-chat thread load failed:', cause);
+    });
+    return () => {
+      live = false;
+    };
+  }, [repositories, reloadToken]);
+
+  const onSubmitQuestion = React.useCallback(
+    async (raw: string): Promise<void> => {
+      const text = raw.trim();
+      if (patientId === null || text.length === 0) return;
+      const { redFlag, reason } = triage(text);
+      const lower = text.toLowerCase();
+      const match = library.find((e) =>
+        e.topic
+          .toLowerCase()
+          .split(/\s+/)
+          .some((w) => w.length > 4 && lower.includes(w)),
+      );
+      const created = await repositories.patientQuestion.create({
+        patientId,
+        questionText: text,
+        redFlag,
+        ...(reason !== undefined ? { redFlagReason: reason } : {}),
+        ...(match !== undefined ? { matchedAnswerId: match.id } : {}),
+        navigatorAlerted: redFlag === 'URGENT',
+        askedAt: new Date().toISOString(),
+      });
+      if (created === null || created.ok === false) {
+        setLoadError(created === null ? { kind: 'transport', message: 'The question could not be saved.' } : created.error);
+        return;
+      }
+      const drafted = await repositories.patientChatAnswer.create({
+        questionId: created.data.id,
+        body: match !== undefined ? match.answerText : 'No draft yet: a clinician will write the reply.',
+        aiDrafted: match !== undefined ? 'ENDORSED_LIBRARY' : 'MANUAL',
+        status: 'AWAITING_CLINICIAN_REVIEW',
+        promotedToLibrary: false,
+      });
+      if (drafted === null || drafted.ok === false) {
+        console.error('[archie] draft answer could not be saved');
+      }
+      reload();
+    },
+    [patientId, library, repositories, reload],
+  );
+
   const onAnswersPageChange = React.useCallback((page: number): void => {
     setAnswersPage(page);
   }, []);
@@ -170,6 +283,8 @@ export function CareChatScreenContainer(
   }, []);
 
   const vm: CareChatScreenViewModel = {
+    thread,
+    onSubmitQuestion,
     answers,
     answersNotice,
     answersTotal,
@@ -195,7 +310,12 @@ export function CareChatScreenContainer(
     libraryTotalCount: null,
     loading,
     error: loadError,
-    availability: careChatScreenViewModelAvailability,
+    availability: {
+      onCreatePatientQuestion:
+        patientId === null
+          ? { available: false, reason: 'sesion-no-identificada' }
+          : careChatScreenViewModelAvailability.onCreatePatientQuestion,
+    },
   };
 
   // ONE `return`, the conditional INSIDE a fragment — never an early return (ARCH-956).

@@ -18,13 +18,28 @@ import type { DataNotice } from './notices';
  *  disabled control with its reason; V6 reads this). Static: it is decided at emit
  *  time. */
 export type CareChatScreenViewModelAvailability = {
-  readonly onCreatePatientQuestion: { readonly available: false; readonly reason: 'escritura-no-disponible' };
+  readonly onCreatePatientQuestion: { readonly available: boolean; readonly reason: 'escritura-no-disponible' | 'sesion-no-identificada' };
 };
 export const careChatScreenViewModelAvailability: CareChatScreenViewModelAvailability = {
-  onCreatePatientQuestion: { available: false, reason: 'escritura-no-disponible' },
+  onCreatePatientQuestion: { available: true, reason: 'escritura-no-disponible' },
 };
 
+/** One question of the patient's thread, with the clinician-approved answer when there is one. */
+export interface CareChatThreadItem {
+  readonly id: string;
+  readonly questionText: string;
+  readonly askedAt: string;
+  readonly redFlag: 'ROUTINE' | 'PRIORITY' | 'URGENT';
+  readonly navigatorAlerted: boolean;
+  /** Approved answer text, or `null` while it awaits clinician review. */
+  readonly answerBody: string | null;
+}
+
 export interface CareChatScreenViewModel {
+  /** The patient's own questions with their approved answers (built by the container). */
+  readonly thread: readonly CareChatThreadItem[];
+  /** Submits a new question: triage, library match, draft answer awaiting review. */
+  readonly onSubmitQuestion: (text: string) => Promise<void>;
   /** The rows of `PatientChatAnswer` this screen paints. The container fetches them;
    *  the view never queries, paginates or sorts. */
   readonly answers: readonly PatientChatAnswer[];

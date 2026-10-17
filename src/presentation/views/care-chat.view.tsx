@@ -61,10 +61,35 @@ export function CareChatView(props: CareChatScreenViewModel): React.ReactElement
 
           <section aria-labelledby="thread-h" className="flex flex-col gap-(--component-gap)">
             <h2 id="thread-h" className="type-section">{t("care-chat.e389fa62")}</h2>
-            <EmptyState
-              title={t("care-chat.e389fa62")}
-              description={t("_reason.escritura-no-disponible")}
-            />
+            {props.thread.length === 0 ? (
+              <EmptyState
+                title={t("care-chat.e389fa62")}
+                description={t("care-chat.thread-empty", { defaultValue: "No questions yet. Ask your care team below." })}
+              />
+            ) : (
+              <ul className="flex flex-col gap-3">
+                {props.thread.map((item) => (
+                  <li key={item.id} className="flex flex-col gap-2 rounded-control border border-border-strong p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="type-meta text-text-muted">{formatDate(item.askedAt)}</span>
+                      {item.redFlag === "URGENT" && (
+                        <span className="type-meta rounded-control bg-status-danger-bg px-2 py-1 text-status-danger-ink">
+                          {t("care-chat.thread-urgent", { defaultValue: "Urgent: your care team has been alerted" })}
+                        </span>
+                      )}
+                    </div>
+                    <p className="type-body">{item.questionText}</p>
+                    {item.answerBody !== null ? (
+                      <p className="type-body rounded-control bg-muted p-3">{item.answerBody}</p>
+                    ) : (
+                      <p className="type-caption text-text-muted">
+                        {t("care-chat.thread-awaiting", { defaultValue: "Awaiting care team review" })}
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
           </section>
 
           <section
@@ -73,7 +98,8 @@ export function CareChatView(props: CareChatScreenViewModel): React.ReactElement
           >
             <h2 id="composer-h" className="type-card-title">{t("care-chat.2f2cf48a")}</h2>
             <form
-              onSubmit={form.handleSubmit(() => {
+              onSubmit={form.handleSubmit((values) => {
+                void props.onSubmitQuestion(values.questionText);
                 form.reset({ questionText: "" });
               })}
               noValidate

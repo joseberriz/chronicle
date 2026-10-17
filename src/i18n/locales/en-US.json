@@ -127,6 +127,9 @@
   },
   "care-chat": {
     "049c93d5": "Search approved answers by topic",
+    "thread-empty": "No questions yet. Ask your care team below.",
+    "thread-urgent": "Urgent: your care team has been alerted",
+    "thread-awaiting": "Awaiting care team review",
     "1617b864": "Your care team has been alerted.",
     "22ae3f97": "Your question",
     "24dfad71": "A clinician is reviewing this. The reply will appear here once it is confirmed.",

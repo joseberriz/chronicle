@@ -18,7 +18,7 @@ import type { PatientQuestion } from '../../domain/entities/patientQuestion';
 import type { UpdatePatientChatAnswer } from '../../domain/ports/patientChatAnswer.repository';
 import type { DataNotice } from '../../application/view-models/notices';
 import { reviewQueueScreenViewModelAvailability, type ReviewQueueScreenViewModel } from '../../application/view-models/review-queue.vm';
-import { useRepositories } from '../app-context';
+import { useIdentity, useRepositories } from '../app-context';
 import { ReviewQueueView } from '../views/review-queue.view';
 import { ScreenError, ScreenLoading } from '../screen-state';
 
@@ -46,6 +46,7 @@ export function ReviewQueueScreenContainer(
 ): React.ReactElement {
   const View = props.view;
   const repositories = useRepositories();
+  const { identity } = useIdentity();
   const navigate = useAppNavigate();
   // No bridgeable principal on the wire: the principal is a CONSTANT null (fail closed, no session query).
   const principal = null;
@@ -174,8 +175,18 @@ export function ReviewQueueScreenContainer(
   const onUpdatePatientChatAnswer = React.useCallback(
     (id: PatientChatAnswerId, patch: Pick<UpdatePatientChatAnswer, 'promotedToLibrary' | 'reviewedAt' | 'reviewedById' | 'reviewerEdits' | 'status'>): void => {
       setWriteError(null);
+      // An approval records WHO approved it (the signed-in clinician, matched by email) and WHEN.
+      const reviewer = identity === null ? undefined : Clinician.find((c) => c.email.toLowerCase() === identity.email.toLowerCase());
+      const stamped: typeof patch =
+        patch.status === 'ENDORSED'
+          ? {
+              ...patch,
+              reviewedAt: patch.reviewedAt ?? new Date().toISOString(),
+              ...(patch.reviewedById === undefined && reviewer !== undefined ? { reviewedById: reviewer.id } : {}),
+            }
+          : patch;
       void repositories.patientChatAnswer
-        .update(id, patch)
+        .update(id, stamped)
         .then((result) => {
           if (result.ok === false) {
             setWriteError(result.error);
@@ -196,7 +207,7 @@ export function ReviewQueueScreenContainer(
           });
         });
     },
-    [repositories, reload],
+    [repositories, reload, identity, Clinician],
   );
 
   const { t } = useTranslation();
