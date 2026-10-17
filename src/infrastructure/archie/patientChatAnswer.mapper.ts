@@ -135,6 +135,8 @@ export function toPatientChatAnswer(row: PatientChatAnswerRow): RepoResult<Patie
  *  las claves salen del schema. */
 export function toPatientChatAnswerCreateInput(input: NewPatientChatAnswer): Record<string, unknown> {
   const out: Record<string, unknown> = {
+    // Required by the backend: a new answer is visible to the patient only once endorsed.
+    availableToPatient: input.status === 'ENDORSED',
   };
   if (input.createdAt !== undefined) out.createdAt = input.createdAt;
   if (input.reviewedAt !== undefined) out.reviewedAt = input.reviewedAt;
@@ -165,7 +167,11 @@ export function toPatientChatAnswerUpdateInput(patch: UpdatePatientChatAnswer): 
   if (patch.reviewedAt !== undefined) out.reviewedAt = patch.reviewedAt;
   if (patch.reviewedById === null) out.reviewedById = null;
   else if (patch.reviewedById != null && String(patch.reviewedById) !== '') out.reviewedById = patch.reviewedById;
-  if (patch.status !== undefined) out.status = wireEnumOutPatientChatAnswer('status', patch.status);
+  if (patch.status !== undefined) {
+    out.status = wireEnumOutPatientChatAnswer('status', patch.status);
+    // Approval is what releases the answer to the patient.
+    out.availableToPatient = patch.status === 'ENDORSED';
+  }
   return out;
 }
 
