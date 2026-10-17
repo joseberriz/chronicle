@@ -1209,6 +1209,11 @@ const ROUTES: readonly { readonly path: string; readonly slug: string; readonly 
     "surface": "auth"
   },
   {
+    "path": "/sign-up",
+    "slug": "sign-up",
+    "surface": "auth"
+  },
+  {
     "path": "/insights-overview",
     "slug": "insights-overview",
     "surface": "insights"

@@ -541,6 +541,15 @@ function Screen_forgot_password() {
   );
 }
 
+const LazyScreen_sign_up = lazy(() => import('./presentation/containers/sign-up.container'));
+function Screen_sign_up() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <LazyScreen_sign_up />
+    </Suspense>
+  );
+}
+
 const LazyScreen_reset_password = lazy(() => import('./presentation/containers/reset-password.container'));
 function Screen_reset_password() {
   return (
@@ -746,6 +755,17 @@ export const routes: AppRoute[] = [
     order: null,
     visibility: null,
     Component: Guarded_review_queue,
+    ErrorBoundary: ErrorBoundary,
+  },
+  {
+    slug: "sign-up",
+    path: "/sign-up",
+    layoutType: "auth",
+    name: "Sign up",
+    icon: null,
+    order: null,
+    visibility: null,
+    Component: Screen_sign_up,
     ErrorBoundary: ErrorBoundary,
   },
   {

@@ -71,6 +71,9 @@ export function LoginView(props: AuthViewModel) {
           <Button type="button" variant="link" size="sm" onClick={() => props.navigate(routes["forgot-password"]())}>
             {"Forgot your password?"}
           </Button>
+          <Button type="button" variant="link" size="sm" onClick={() => props.navigate(routes["sign-up"]())}>
+            {"New to Chronicle? Create an account"}
+          </Button>
           </CardFooter>
         </form>
       </Card>
