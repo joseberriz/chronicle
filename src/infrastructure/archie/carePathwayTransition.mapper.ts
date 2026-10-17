@@ -126,7 +126,9 @@ export function toCarePathwayTransition(row: CarePathwayTransitionRow): RepoResu
     );
   }
   void requiredColumnAbsent;
-  const raw = row.targetStage?.stage ?? '';
+  const code = row.targetStage?.stage ?? '';
+  const names: Readonly<Record<string, string>> = { '1': 'screening', '2': 'diagnosis', '3': 'planning', '4': 'treatment', '5': 'response assessment', '6': 'remission', '7A': 'survivorship', '7B': 'progression' };
+  const raw = names[code] ?? code;
   // The target stage name comes from the linked stage row; unknown when not selected.
   const targetStage: CarePathwayTransitionTargetStage = (CARE_PATHWAY_TRANSITION_TARGET_STAGE_VALUES as readonly string[]).includes(raw)
     ? (raw as CarePathwayTransitionTargetStage)

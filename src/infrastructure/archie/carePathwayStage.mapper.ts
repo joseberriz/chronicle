@@ -183,7 +183,8 @@ export function toCarePathwayStage(row: CarePathwayStageRow): RepoResult<CarePat
     );
   }
   void requiredColumnAbsent;
-  const stage = valueFromWire(CARE_PATHWAY_STAGE_STAGE_FROM_WIRE, row.stage ?? '');
+  const raw = row.stage ?? '';
+  const stage = STAGE_CODE_NAMES[raw] ?? valueFromWire(CARE_PATHWAY_STAGE_STAGE_FROM_WIRE, raw);
   const status: CarePathwayStageStatus = (CARE_PATHWAY_STAGE_STATUS_VALUES as readonly string[]).includes(row.status)
     ? (row.status as CarePathwayStageStatus)
     : 'PROPOSED';
@@ -200,6 +201,18 @@ export function toCarePathwayStage(row: CarePathwayStageRow): RepoResult<CarePat
     },
   };
 }
+
+/** The data stores Chronicle stage codes ("1" … "7B"); these are their names. */
+const STAGE_CODE_NAMES: Readonly<Record<string, string>> = {
+  '1': 'screening',
+  '2': 'diagnosis',
+  '3': 'planning',
+  '4': 'treatment',
+  '5': 'response assessment',
+  '6': 'remission',
+  '7A': 'survivorship',
+  '7B': 'progression',
+};
 
 const STAGE_ORDER: readonly string[] = [
   'screening',

@@ -155,7 +155,9 @@ export function toCarePathway(row: CarePathwayRow): RepoResult<CarePathway> {
     );
   }
   void requiredColumnAbsent;
-  const stage = valueFromWire(CARE_PATHWAY_CURRENT_STAGE_FROM_WIRE, row.currentStage ?? '');
+  const rawStage = row.currentStage ?? '';
+  // The data stores Chronicle stage codes ("1" … "7B"); translate them to stage names.
+  const stage = CODE_TO_STAGE[rawStage] ?? valueFromWire(CARE_PATHWAY_CURRENT_STAGE_FROM_WIRE, rawStage);
   const seq = typeof row.sequence === 'number' ? row.sequence : 1;
   const status = (CARE_PATHWAY_STATUS_VALUES as readonly string[]).includes(stage)
     ? (stage as CarePathwayStatus)
@@ -168,7 +170,7 @@ export function toCarePathway(row: CarePathwayRow): RepoResult<CarePathway> {
       title: 'Episode ' + String(seq) + ' · ' + stage,
       patientId: row.patientId,
       currentStage: stage,
-      stageCode: STAGE_CODE[stage] ?? stage,
+      stageCode: CODE_TO_STAGE[rawStage] !== undefined ? rawStage : (STAGE_CODE[stage] ?? stage),
       sequence: seq,
       ...(row.previousEpisodeId ? { previousEpisodeId: row.previousEpisodeId } : {}),
       discussedWithPatient: row.discussedWithPatient === true,
@@ -178,6 +180,17 @@ export function toCarePathway(row: CarePathwayRow): RepoResult<CarePathway> {
     },
   };
 }
+
+const CODE_TO_STAGE: Readonly<Record<string, string>> = {
+  '1': 'screening',
+  '2': 'diagnosis',
+  '3': 'planning',
+  '4': 'treatment',
+  '5': 'response assessment',
+  '6': 'remission',
+  '7A': 'survivorship',
+  '7B': 'progression',
+};
 
 /** Chronicle stage numbers (1 → 7B) for each lifecycle stage. */
 const STAGE_CODE: Readonly<Record<string, string>> = {
