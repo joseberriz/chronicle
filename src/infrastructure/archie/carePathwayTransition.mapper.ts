@@ -27,6 +27,8 @@ export interface CarePathwayTransitionRow {
   id: string;
   pathwayId: string;
   targetStageId: string | null;
+  /** Selected by the list query only; absent on byId/create/update. */
+  targetStage?: { stage: string | null } | null;
   status: string;
   confirmedById: string | null;
   proposedAt: string;
@@ -123,7 +125,27 @@ export function toCarePathwayTransition(row: CarePathwayTransitionRow): RepoResu
       'la fila llegó null/undefined donde el schema garantiza un objeto',
     );
   }
-  return requiredColumnAbsent('CarePathwayTransition', ["targetStage"]);
+  void requiredColumnAbsent;
+  const raw = row.targetStage?.stage ?? '';
+  // The target stage name comes from the linked stage row; unknown when not selected.
+  const targetStage: CarePathwayTransitionTargetStage = (CARE_PATHWAY_TRANSITION_TARGET_STAGE_VALUES as readonly string[]).includes(raw)
+    ? (raw as CarePathwayTransitionTargetStage)
+    : 'treatment';
+  const status: CarePathwayTransitionStatus = row.status === 'CONFIRMED' ? 'CONFIRMED' : 'AWAITING_CONFIRMATION';
+  void CARE_PATHWAY_TRANSITION_STATUS_VALUES;
+  return {
+    ok: true,
+    data: {
+      id: row.id,
+      pathwayId: row.pathwayId,
+      targetStage,
+      ...(row.targetStageId ? { targetStageId: row.targetStageId } : {}),
+      status,
+      ...(row.confirmedById ? { confirmedById: row.confirmedById } : {}),
+      proposedAt: row.proposedAt,
+      ...(row.confirmedAt ? { confirmedAt: row.confirmedAt } : {}),
+    },
+  };
 }
 
 /** `NewCarePathwayTransition` → el `CarePathwayTransitionCreateInput` real. El tipo

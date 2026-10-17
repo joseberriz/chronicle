@@ -113,8 +113,41 @@ export function toConcordanceCheck(row: ConcordanceCheckRow): RepoResult<Concord
       'la fila llegó null/undefined donde el schema garantiza un objeto',
     );
   }
-  return requiredColumnAbsent('ConcordanceCheck', ["title","explanation","prospective"]);
+  void requiredColumnAbsent;
+  const result: ConcordanceCheckResult = (CONCORDANCE_CHECK_RESULT_VALUES as readonly string[]).includes(row.result)
+    ? (row.result as ConcordanceCheckResult)
+    : 'NOT_EVALUATED';
+  // No title/explanation/prospective columns: derive them from the result.
+  return {
+    ok: true,
+    data: {
+      id: row.id,
+      title: CONCORDANCE_TITLE[result],
+      planId: row.planId,
+      ...(row.policyPackId ? { policyPackId: row.policyPackId } : {}),
+      ...(row.guidelineNodeId ? { guidelineNodeId: row.guidelineNodeId } : {}),
+      result,
+      explanation: CONCORDANCE_EXPLANATION[result],
+      prospective: result === 'PENDING',
+      evaluatedAt: row.evaluatedAt,
+      createdAt: row.createdAt,
+    },
+  };
 }
+
+const CONCORDANCE_TITLE: Readonly<Record<ConcordanceCheckResult, string>> = {
+  CONCORDANT: 'Plan concordant with guideline',
+  DEVIATION_FOUND: 'Deviation from guideline',
+  PENDING: 'Concordance check pending',
+  NOT_EVALUATED: 'Not evaluated',
+};
+
+const CONCORDANCE_EXPLANATION: Readonly<Record<ConcordanceCheckResult, string>> = {
+  CONCORDANT: 'The treatment plan matches the recommended guideline path.',
+  DEVIATION_FOUND: 'The treatment plan departs from the recommended guideline path; see recorded deviations.',
+  PENDING: 'The check is waiting on data before it can be evaluated.',
+  NOT_EVALUATED: 'No guideline applies or the check has not run.',
+};
 
 /** `NewConcordanceCheck` → el `ConcordanceCheckCreateInput` real. El tipo de retorno
  *  es la bolsa de variables de GraphQL, que es lo que el SDK recibe: tipar aquí el

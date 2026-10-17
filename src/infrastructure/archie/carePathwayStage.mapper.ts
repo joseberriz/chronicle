@@ -182,8 +182,36 @@ export function toCarePathwayStage(row: CarePathwayStageRow): RepoResult<CarePat
       'la fila llegó null/undefined donde el schema garantiza un objeto',
     );
   }
-  return requiredColumnAbsent('CarePathwayStage', ["sequence"]);
+  void requiredColumnAbsent;
+  const stage = valueFromWire(CARE_PATHWAY_STAGE_STAGE_FROM_WIRE, row.stage ?? '');
+  const status: CarePathwayStageStatus = (CARE_PATHWAY_STAGE_STATUS_VALUES as readonly string[]).includes(row.status)
+    ? (row.status as CarePathwayStageStatus)
+    : 'PROPOSED';
+  return {
+    ok: true,
+    data: {
+      id: row.id,
+      pathwayId: row.pathwayId,
+      stage,
+      // No sequence column: order by the stage's position in the lifecycle.
+      sequence: STAGE_ORDER.indexOf(stage) + 1,
+      status,
+      ...(row.completedAt ? { completedAt: row.completedAt } : {}),
+    },
+  };
 }
+
+const STAGE_ORDER: readonly string[] = [
+  'screening',
+  'diagnosis',
+  'planning',
+  'treatment',
+  'response assessment',
+  'remission',
+  'survivorship',
+  'progression',
+  'palliative care',
+];
 
 /** `NewCarePathwayStage` → el `CarePathwayStageCreateInput` real. El tipo de retorno
  *  es la bolsa de variables de GraphQL, que es lo que el SDK recibe: tipar aquí el

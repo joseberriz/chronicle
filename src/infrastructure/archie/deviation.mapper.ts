@@ -25,6 +25,8 @@ export interface DeviationRow {
   checkId: string;
   justification: string;
   recordedById: string;
+  /** System timestamp, selected by the list query only. */
+  createdAt?: string | null;
 }
 
 /** Campos obligatorios del prototipo SIN columna en el wire: ninguna fila se puede
@@ -62,7 +64,22 @@ export function toDeviation(row: DeviationRow): RepoResult<Deviation> {
       'la fila llegó null/undefined donde el schema garantiza un objeto',
     );
   }
-  return requiredColumnAbsent('Deviation', ["reason","recordedAt"]);
+  void requiredColumnAbsent;
+  const justification = row.justification ?? '';
+  // No reason/recordedAt columns: the reason is the justification's first sentence,
+  // recordedAt is when the row was created.
+  const firstSentence = justification.split(/(?<=[.!?])\s/)[0] ?? justification;
+  return {
+    ok: true,
+    data: {
+      id: row.id,
+      checkId: row.checkId,
+      reason: firstSentence.length > 120 ? firstSentence.slice(0, 117) + '…' : firstSentence,
+      justification,
+      recordedById: row.recordedById,
+      recordedAt: row.createdAt ?? '',
+    },
+  };
 }
 
 /** `NewDeviation` → el `DeviationCreateInput` real. El tipo de retorno es la bolsa

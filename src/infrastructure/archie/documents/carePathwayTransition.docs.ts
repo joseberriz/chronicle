@@ -22,6 +22,7 @@ export const CARE_PATHWAY_TRANSITION_LIST = `query Gen_CarePathwayTransition_Lis
       id
       pathwayId
       targetStageId
+      targetStage { stage }
       status
       confirmedById
       proposedAt

@@ -154,8 +154,43 @@ export function toCarePathway(row: CarePathwayRow): RepoResult<CarePathway> {
       'la fila llegó null/undefined donde el schema garantiza un objeto',
     );
   }
-  return requiredColumnAbsent('CarePathway', ["title","stageCode"]);
+  void requiredColumnAbsent;
+  const stage = valueFromWire(CARE_PATHWAY_CURRENT_STAGE_FROM_WIRE, row.currentStage ?? '');
+  const seq = typeof row.sequence === 'number' ? row.sequence : 1;
+  const status = (CARE_PATHWAY_STATUS_VALUES as readonly string[]).includes(stage)
+    ? (stage as CarePathwayStatus)
+    : undefined;
+  return {
+    ok: true,
+    data: {
+      id: row.id,
+      // No title/stageCode columns: derive them from the episode number and current stage.
+      title: 'Episode ' + String(seq) + ' · ' + stage,
+      patientId: row.patientId,
+      currentStage: stage,
+      stageCode: STAGE_CODE[stage] ?? stage,
+      sequence: seq,
+      ...(row.previousEpisodeId ? { previousEpisodeId: row.previousEpisodeId } : {}),
+      discussedWithPatient: row.discussedWithPatient === true,
+      startedAt: row.startedAt,
+      createdAt: row.createdAt,
+      ...(status !== undefined ? { status } : {}),
+    },
+  };
 }
+
+/** Chronicle stage numbers (1 → 7B) for each lifecycle stage. */
+const STAGE_CODE: Readonly<Record<string, string>> = {
+  'screening': '1',
+  'diagnosis': '2',
+  'planning': '3',
+  'treatment': '4',
+  'response assessment': '5',
+  'remission': '6',
+  'survivorship': '7A',
+  'progression': '7B',
+  'palliative care': '7B',
+};
 
 /** `NewCarePathway` → el `CarePathwayCreateInput` real. El tipo de retorno es la
  *  bolsa de variables de GraphQL, que es lo que el SDK recibe: tipar aquí el input

@@ -23,6 +23,7 @@ export const DEVIATION_LIST = `query Gen_Deviation_List_g1($filter: DeviationFil
       checkId
       justification
       recordedById
+      createdAt
     }
     totalCount
   }

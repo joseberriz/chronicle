@@ -137,7 +137,28 @@ export function toFrameContractItem(row: FrameContractItemRow): RepoResult<Frame
       'la fila llegó null/undefined donde el schema garantiza un objeto',
     );
   }
-  return requiredColumnAbsent('FrameContractItem', ["suppliedBy"]);
+  void requiredColumnAbsent;
+  void FRAME_CONTRACT_ITEM_SUPPLIED_BY_VALUES;
+  const stage = Object.prototype.hasOwnProperty.call(FRAME_CONTRACT_ITEM_REQUIRED_AT_STAGE_FROM_WIRE, row.requiredAtStage)
+    ? (FRAME_CONTRACT_ITEM_REQUIRED_AT_STAGE_FROM_WIRE[row.requiredAtStage] ?? row.requiredAtStage)
+    : row.requiredAtStage;
+  // No suppliedBy column: patient-reported elements (symptoms, wellbeing, PROs) are
+  // supplied by the patient; everything else by the clinician.
+  const suppliedBy: FrameContractItemSuppliedBy = /symptom|patient|wellbeing|quality of life|pro\b|reported/i.test(
+    row.elementName + ' ' + (row.definition ?? ''),
+  )
+    ? 'patient'
+    : 'clinician';
+  return {
+    ok: true,
+    data: {
+      id: row.id,
+      elementName: row.elementName,
+      requiredAtStage: stage,
+      suppliedBy,
+      ...(row.definition ? { definition: row.definition } : {}),
+    },
+  };
 }
 
 /** `NewFrameContractItem` → el `FrameContractItemCreateInput` real. El tipo de
