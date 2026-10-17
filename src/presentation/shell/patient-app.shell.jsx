@@ -142,7 +142,7 @@ export function PatientAppShell({ vm, children }) {
               data-slot="section-title"
               className="min-w-0 flex-1 truncate font-display type-card-title md:hidden"
             >
-              {currentItem?.title || name}
+              Chronicle
             </span>
 
             {has.search && (

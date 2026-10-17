@@ -193,7 +193,7 @@ export function InsightsShell({ vm, children }) {
             data-slot="section-title"
             className="min-w-0 flex-1 truncate type-card-title font-display md:hidden"
           >
-            {currentItem?.title ?? surface?.title ?? name}
+            Chronicle
           </p>
 
           {has.search && (

@@ -141,7 +141,7 @@ export function PatientPathwayShell({ vm, children }) {
             data-slot="section-title"
             className="type-row-title min-w-0 flex-1 truncate md:hidden"
           >
-            {currentItem?.title || surface?.title || ""}
+            Chronicle
           </span>
 
           {has.search && (

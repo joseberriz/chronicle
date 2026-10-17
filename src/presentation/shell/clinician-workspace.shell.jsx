@@ -204,7 +204,7 @@ export function ClinicianWorkspaceShell({ vm, children }) {
             data-slot="section-title"
             className="type-card-title min-w-0 flex-1 truncate md:hidden"
           >
-            {currentItem?.title}
+            Chronicle
           </p>
 
           {has.search && (
