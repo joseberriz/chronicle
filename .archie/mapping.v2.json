@@ -1,0 +1,1561 @@
+{
+  "meta": {
+    "version": 2,
+    "projectId": "047b2f74-e683-45d5-9d1e-7fd7be4679b7",
+    "schemaHash": "34a7b74ea667396f32b05027f4bbd3e368d34ebc1ff148465799cbb2644ecaf3",
+    "protoHash": "sha256:0ff6fce22907f63b3f8f9895d1e4d7037a4b8411752b2dfdd8795b06b45b477c",
+    "model": "C6",
+    "generatedAt": "2026-10-17T17:34:12.850Z",
+    "llmResolved": 34,
+    "unmapped": 0
+  },
+  "entities": [
+    {
+      "proto": "AdverseEvent",
+      "target": "AdverseEvent",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "attribution",
+          "target": "attribution",
+          "confidence": 0.95
+        },
+        {
+          "proto": "clinicianNote",
+          "target": null,
+          "confidence": 0.8
+        },
+        {
+          "proto": "grade",
+          "target": "grade",
+          "confidence": 0.97
+        },
+        {
+          "proto": "gradedAt",
+          "target": null,
+          "confidence": 0.7
+        },
+        {
+          "proto": "gradedById",
+          "target": "gradedById",
+          "confidence": 0.97
+        },
+        {
+          "proto": "patientId",
+          "target": "patientId",
+          "confidence": 0.98
+        },
+        {
+          "proto": "symptomLogId",
+          "target": "symptomLogId",
+          "confidence": 0.98
+        },
+        {
+          "proto": "term",
+          "target": "term",
+          "confidence": 0.98
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "AggregateQuery",
+      "target": "AggregateQuery",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "cohortSize",
+          "target": "cohortSize",
+          "confidence": 0.97
+        },
+        {
+          "proto": "createdAt",
+          "target": "createdAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "parameters",
+          "target": null,
+          "confidence": 0.7
+        },
+        {
+          "proto": "policyPackId",
+          "target": "policyPackId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "queryType",
+          "target": "queryType",
+          "confidence": 0.97
+        },
+        {
+          "proto": "ranAt",
+          "target": "ranAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "resultValue",
+          "target": "resultValue",
+          "confidence": 0.85
+        },
+        {
+          "proto": "runBy",
+          "target": null,
+          "confidence": 0.6
+        },
+        {
+          "proto": "scopeId",
+          "target": "scopeId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "suppressedCells",
+          "target": null,
+          "confidence": 0.8
+        },
+        {
+          "proto": "title",
+          "target": "title",
+          "confidence": 0.97
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "CarePathway",
+      "target": "CarePathway",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "createdAt",
+          "target": "createdAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "currentStage",
+          "target": "currentStage",
+          "confidence": 0.97
+        },
+        {
+          "proto": "discussedAt",
+          "target": null,
+          "confidence": 0.75
+        },
+        {
+          "proto": "discussedWithPatient",
+          "target": "discussedWithPatient",
+          "confidence": 0.97
+        },
+        {
+          "proto": "patientId",
+          "target": "patientId",
+          "confidence": 0.98
+        },
+        {
+          "proto": "previousEpisodeId",
+          "target": "previousEpisodeId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "sequence",
+          "target": "sequence",
+          "confidence": 0.97
+        },
+        {
+          "proto": "stageCode",
+          "target": null,
+          "confidence": 0.75
+        },
+        {
+          "proto": "startedAt",
+          "target": "startedAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "status",
+          "target": null,
+          "confidence": 0.75
+        },
+        {
+          "proto": "title",
+          "target": null,
+          "confidence": 0.75
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "CarePathwayStage",
+      "target": "CarePathwayStage",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "completedAt",
+          "target": "completedAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "pathwayId",
+          "target": "pathwayId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "sequence",
+          "target": null,
+          "confidence": 0.75
+        },
+        {
+          "proto": "stage",
+          "target": "stage",
+          "confidence": 0.97
+        },
+        {
+          "proto": "status",
+          "target": "status",
+          "confidence": 0.95
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "CarePathwayTransition",
+      "target": "CarePathwayTransition",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "confirmedAt",
+          "target": "confirmedAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "confirmedById",
+          "target": "confirmedById",
+          "confidence": 0.97
+        },
+        {
+          "proto": "pathwayId",
+          "target": "pathwayId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "proposedAt",
+          "target": "proposedAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "status",
+          "target": "status",
+          "confidence": 0.95
+        },
+        {
+          "proto": "targetStage",
+          "target": null,
+          "confidence": 0.6
+        },
+        {
+          "proto": "targetStageId",
+          "target": "targetStageId",
+          "confidence": 0.97
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "CareTeamAssignment",
+      "target": "CareTeamAssignment",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "careTeamId",
+          "target": "careTeamId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "clinicianId",
+          "target": "clinicianId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "endsAt",
+          "target": "endsAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "patientId",
+          "target": null,
+          "confidence": 0.8
+        },
+        {
+          "proto": "startsAt",
+          "target": "startsAt",
+          "confidence": 0.97
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "CheckIn",
+      "target": "CheckIn",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "checkInType",
+          "target": "checkInType",
+          "confidence": 0.97
+        },
+        {
+          "proto": "completedAt",
+          "target": "completedAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "createdAt",
+          "target": "createdAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "dueDate",
+          "target": "dueDate",
+          "confidence": 0.97
+        },
+        {
+          "proto": "patientId",
+          "target": "patientId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "responses",
+          "target": null,
+          "confidence": 0.8
+        },
+        {
+          "proto": "status",
+          "target": "status",
+          "confidence": 0.95
+        },
+        {
+          "proto": "title",
+          "target": null,
+          "confidence": 0.8
+        },
+        {
+          "proto": "wellbeingScore",
+          "target": null,
+          "confidence": 0.8
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "ClinicalRecord",
+      "target": "ClinicalRecord",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "createdAt",
+          "target": "createdAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "label",
+          "target": "label",
+          "confidence": 0.97
+        },
+        {
+          "proto": "observedAt",
+          "target": "observedAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "patientId",
+          "target": "patientId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "recordType",
+          "target": "recordType",
+          "confidence": 0.97
+        },
+        {
+          "proto": "source",
+          "target": "source",
+          "confidence": 0.97
+        },
+        {
+          "proto": "sourceDocumentId",
+          "target": "sourceDocumentId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "status",
+          "target": "status",
+          "confidence": 0.95
+        },
+        {
+          "proto": "unit",
+          "target": "unit",
+          "confidence": 0.97
+        },
+        {
+          "proto": "value",
+          "target": "value",
+          "confidence": 0.97
+        },
+        {
+          "proto": "verifiedAt",
+          "target": null,
+          "confidence": 0.8
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "Clinician",
+      "target": "Clinician",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "careTeamId",
+          "target": null,
+          "confidence": 0.8
+        },
+        {
+          "proto": "credential",
+          "target": "credential",
+          "confidence": 0.97
+        },
+        {
+          "proto": "email",
+          "target": "email",
+          "confidence": 0.97
+        },
+        {
+          "proto": "fullName",
+          "target": "fullName",
+          "confidence": 0.97
+        },
+        {
+          "proto": "userId",
+          "target": "userId",
+          "confidence": 0.97
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "ConcordanceCheck",
+      "target": "ConcordanceCheck",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "createdAt",
+          "target": "createdAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "evaluatedAt",
+          "target": "evaluatedAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "explanation",
+          "target": null,
+          "confidence": 0.8
+        },
+        {
+          "proto": "guidelineNodeId",
+          "target": "guidelineNodeId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "planId",
+          "target": "planId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "policyPackId",
+          "target": "policyPackId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "prospective",
+          "target": null,
+          "confidence": 0.8
+        },
+        {
+          "proto": "result",
+          "target": "result",
+          "confidence": 0.97
+        },
+        {
+          "proto": "title",
+          "target": null,
+          "confidence": 0.8
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "DataRequest",
+      "target": "DataRequest",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "answeredAt",
+          "target": "answeredAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "audience",
+          "target": "audience",
+          "confidence": 0.97
+        },
+        {
+          "proto": "batchKey",
+          "target": "batchKey",
+          "confidence": 0.97
+        },
+        {
+          "proto": "createdAt",
+          "target": "createdAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "dueDate",
+          "target": "dueDate",
+          "confidence": 0.97
+        },
+        {
+          "proto": "frameItemId",
+          "target": "frameItemId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "patientId",
+          "target": "patientId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "prompt",
+          "target": "prompt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "response",
+          "target": "response",
+          "confidence": 0.97
+        },
+        {
+          "proto": "status",
+          "target": "status",
+          "confidence": 0.95
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "Deviation",
+      "target": "Deviation",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "checkId",
+          "target": "checkId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "justification",
+          "target": "justification",
+          "confidence": 0.97
+        },
+        {
+          "proto": "reason",
+          "target": null,
+          "confidence": 0.75
+        },
+        {
+          "proto": "recordedAt",
+          "target": null,
+          "confidence": 0.7
+        },
+        {
+          "proto": "recordedById",
+          "target": "recordedById",
+          "confidence": 0.97
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "Document",
+      "target": "Document",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "createdAt",
+          "target": "createdAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "documentType",
+          "target": "documentType",
+          "confidence": 0.97
+        },
+        {
+          "proto": "file",
+          "target": "file",
+          "confidence": 0.9
+        },
+        {
+          "proto": "pageCount",
+          "target": null,
+          "confidence": 0.8
+        },
+        {
+          "proto": "patientId",
+          "target": "patientId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "reviewedById",
+          "target": "reviewedById",
+          "confidence": 0.97
+        },
+        {
+          "proto": "source",
+          "target": "source",
+          "confidence": 0.97
+        },
+        {
+          "proto": "status",
+          "target": "status",
+          "confidence": 0.95
+        },
+        {
+          "proto": "title",
+          "target": "title",
+          "confidence": 0.97
+        },
+        {
+          "proto": "uploadedAt",
+          "target": "uploadedAt",
+          "confidence": 0.97
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "EndorsedAnswer",
+      "target": "EndorsedAnswer",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "answerText",
+          "target": "answerText",
+          "confidence": 0.97
+        },
+        {
+          "proto": "endorsedAt",
+          "target": "endorsedAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "endorsedById",
+          "target": "endorsedById",
+          "confidence": 0.97
+        },
+        {
+          "proto": "topic",
+          "target": "topic",
+          "confidence": 0.97
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "ExtractedField",
+      "target": "ExtractedField",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "confidence",
+          "target": "confidence",
+          "confidence": 0.97
+        },
+        {
+          "proto": "confirmed",
+          "target": "confirmed",
+          "confidence": 0.93
+        },
+        {
+          "proto": "documentId",
+          "target": "documentId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "fieldName",
+          "target": "fieldName",
+          "confidence": 0.97
+        },
+        {
+          "proto": "proposedValue",
+          "target": "proposedValue",
+          "confidence": 0.97
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "FollowUp",
+      "target": "FollowUp",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "completedAt",
+          "target": "completedAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "createdAt",
+          "target": "createdAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "dueDate",
+          "target": "dueDate",
+          "confidence": 0.97
+        },
+        {
+          "proto": "intervalMonths",
+          "target": null,
+          "confidence": 0.8
+        },
+        {
+          "proto": "patientId",
+          "target": "patientId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "ruleId",
+          "target": "ruleId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "status",
+          "target": "status",
+          "confidence": 0.95
+        },
+        {
+          "proto": "title",
+          "target": "title",
+          "confidence": 0.97
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "FrameContractItem",
+      "target": "FrameContractItem",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "definition",
+          "target": "definition",
+          "confidence": 0.97
+        },
+        {
+          "proto": "elementName",
+          "target": "elementName",
+          "confidence": 0.97
+        },
+        {
+          "proto": "requiredAtStage",
+          "target": "requiredAtStage",
+          "confidence": 0.97
+        },
+        {
+          "proto": "suppliedBy",
+          "target": null,
+          "confidence": 0.8
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "GuidelineNode",
+      "target": "GuidelineNode",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "label",
+          "target": "label",
+          "confidence": 0.97
+        },
+        {
+          "proto": "parentId",
+          "target": "parentId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "recommendation",
+          "target": "recommendation",
+          "confidence": 0.97
+        },
+        {
+          "proto": "sourceVersion",
+          "target": "sourceVersion",
+          "confidence": 0.97
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "MetricDefinition",
+      "target": "MetricDefinition",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "definition",
+          "target": "definition",
+          "confidence": 0.97
+        },
+        {
+          "proto": "metricName",
+          "target": "metricName",
+          "confidence": 0.97
+        },
+        {
+          "proto": "riskAdjusted",
+          "target": "riskAdjusted",
+          "confidence": 0.97
+        },
+        {
+          "proto": "source",
+          "target": "source",
+          "confidence": 0.97
+        },
+        {
+          "proto": "suppressionRule",
+          "target": "suppressionRule",
+          "confidence": 0.97
+        },
+        {
+          "proto": "unit",
+          "target": "unit",
+          "confidence": 0.97
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "OralDoseLog",
+      "target": "OralDoseLog",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "dose",
+          "target": "dose",
+          "confidence": 0.97
+        },
+        {
+          "proto": "doseUnit",
+          "target": "doseUnit",
+          "confidence": 0.97
+        },
+        {
+          "proto": "loggedAt",
+          "target": "loggedAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "medication",
+          "target": "medication",
+          "confidence": 0.97
+        },
+        {
+          "proto": "planId",
+          "target": "planId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "taken",
+          "target": "taken",
+          "confidence": 0.93
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "OrgUnit",
+      "target": "OrgUnit",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "name",
+          "target": "name",
+          "confidence": 0.97
+        },
+        {
+          "proto": "parentId",
+          "target": "parentId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "unitType",
+          "target": "unitType",
+          "confidence": 0.97
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "Patient",
+      "target": "Patient",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "careTeamId",
+          "target": "careTeamId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "caregiverName",
+          "target": null,
+          "confidence": 0.8
+        },
+        {
+          "proto": "createdAt",
+          "target": "createdAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "dateOfBirth",
+          "target": "dateOfBirth",
+          "confidence": 0.97
+        },
+        {
+          "proto": "email",
+          "target": null,
+          "confidence": 0.75
+        },
+        {
+          "proto": "fullName",
+          "target": "fullName",
+          "confidence": 0.97
+        },
+        {
+          "proto": "phone",
+          "target": null,
+          "confidence": 0.75
+        },
+        {
+          "proto": "primaryDiagnosis",
+          "target": "primaryDiagnosis",
+          "confidence": 0.97
+        },
+        {
+          "proto": "riskScore",
+          "target": "riskScore",
+          "confidence": 0.97
+        },
+        {
+          "proto": "shareWithCaregiver",
+          "target": null,
+          "confidence": 0.8
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "PatientChatAnswer",
+      "target": "PatientChatAnswer",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "aiDrafted",
+          "target": "aiDrafted",
+          "confidence": 0.93
+        },
+        {
+          "proto": "body",
+          "target": "body",
+          "confidence": 0.97
+        },
+        {
+          "proto": "createdAt",
+          "target": "createdAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "promotedToLibrary",
+          "target": "promotedToLibrary",
+          "confidence": 0.97
+        },
+        {
+          "proto": "questionId",
+          "target": "questionId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "reviewedAt",
+          "target": "reviewedAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "reviewedById",
+          "target": "reviewedById",
+          "confidence": 0.97
+        },
+        {
+          "proto": "reviewerEdits",
+          "target": null,
+          "confidence": 0.8
+        },
+        {
+          "proto": "status",
+          "target": "status",
+          "confidence": 0.95
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "PatientQuestion",
+      "target": "PatientQuestion",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "askedAt",
+          "target": "askedAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "createdAt",
+          "target": "createdAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "matchedAnswerId",
+          "target": "matchedAnswerId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "navigatorAlerted",
+          "target": null,
+          "confidence": 0.8
+        },
+        {
+          "proto": "patientId",
+          "target": "patientId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "questionText",
+          "target": "questionText",
+          "confidence": 0.97
+        },
+        {
+          "proto": "redFlag",
+          "target": "redFlag",
+          "confidence": 0.93
+        },
+        {
+          "proto": "redFlagReason",
+          "target": "redFlagReason",
+          "confidence": 0.97
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "PlanRevision",
+      "target": "PlanRevision",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "changeSummary",
+          "target": "changeSummary",
+          "confidence": 0.97
+        },
+        {
+          "proto": "planId",
+          "target": "planId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "revisedAt",
+          "target": "revisedAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "revisionNumber",
+          "target": "revisionNumber",
+          "confidence": 0.97
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "PolicyPack",
+      "target": "PolicyPack",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "description",
+          "target": "description",
+          "confidence": 0.97
+        },
+        {
+          "proto": "institution",
+          "target": "institution",
+          "confidence": 0.97
+        },
+        {
+          "proto": "packName",
+          "target": "packName",
+          "confidence": 0.97
+        },
+        {
+          "proto": "suppressionThreshold",
+          "target": "suppressionThreshold",
+          "confidence": 0.97
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "RoughPatchAlert",
+      "target": "RoughPatchAlert",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "acknowledgedAt",
+          "target": "acknowledgedAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "acknowledgedById",
+          "target": "acknowledgedById",
+          "confidence": 0.97
+        },
+        {
+          "proto": "createdAt",
+          "target": "createdAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "forecastProbability",
+          "target": "forecastProbability",
+          "confidence": 0.97
+        },
+        {
+          "proto": "headline",
+          "target": null,
+          "confidence": 0.8
+        },
+        {
+          "proto": "patientId",
+          "target": "patientId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "periodEnd",
+          "target": "periodEnd",
+          "confidence": 0.97
+        },
+        {
+          "proto": "periodStart",
+          "target": "periodStart",
+          "confidence": 0.97
+        },
+        {
+          "proto": "status",
+          "target": "status",
+          "confidence": 0.95
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "StageRequirement",
+      "target": "StageRequirement",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "required",
+          "target": null,
+          "confidence": 0.8
+        },
+        {
+          "proto": "requiredData",
+          "target": "requiredData",
+          "confidence": 0.97
+        },
+        {
+          "proto": "requirementName",
+          "target": "requirementName",
+          "confidence": 0.97
+        },
+        {
+          "proto": "stage",
+          "target": "stage",
+          "confidence": 0.97
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "SurvivorshipCarePlan",
+      "target": "SurvivorshipCarePlan",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "createdAt",
+          "target": "createdAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "deliveredAt",
+          "target": "deliveredAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "followUpGuidance",
+          "target": null,
+          "confidence": 0.8
+        },
+        {
+          "proto": "patientId",
+          "target": "patientId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "sharedWithCaregiver",
+          "target": null,
+          "confidence": 0.8
+        },
+        {
+          "proto": "status",
+          "target": "status",
+          "confidence": 0.97
+        },
+        {
+          "proto": "summaryPdf",
+          "target": "summaryPdf",
+          "confidence": 0.9
+        },
+        {
+          "proto": "title",
+          "target": "title",
+          "confidence": 0.97
+        },
+        {
+          "proto": "treatmentSummary",
+          "target": "treatmentSummary",
+          "confidence": 0.97
+        },
+        {
+          "proto": "updatedAt",
+          "target": "updatedAt",
+          "confidence": 0.97
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "SurvivorshipRule",
+      "target": "SurvivorshipRule",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "diagnosisGroup",
+          "target": null,
+          "confidence": 0.8
+        },
+        {
+          "proto": "intervalMonths",
+          "target": "intervalMonths",
+          "confidence": 0.97
+        },
+        {
+          "proto": "requirement",
+          "target": "requirement",
+          "confidence": 0.97
+        },
+        {
+          "proto": "ruleName",
+          "target": "ruleName",
+          "confidence": 0.97
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "SymptomLog",
+      "target": "SymptomLog",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "createdAt",
+          "target": "createdAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "cycleNumber",
+          "target": null,
+          "confidence": 0.8
+        },
+        {
+          "proto": "notes",
+          "target": "notes",
+          "confidence": 0.97
+        },
+        {
+          "proto": "onsetAt",
+          "target": "onsetAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "patientId",
+          "target": "patientId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "remedyHelped",
+          "target": "remedyHelped",
+          "confidence": 0.93
+        },
+        {
+          "proto": "remedyTried",
+          "target": "remedyTried",
+          "confidence": 0.97
+        },
+        {
+          "proto": "severity",
+          "target": "severity",
+          "confidence": 0.93
+        },
+        {
+          "proto": "symptom",
+          "target": "symptom",
+          "confidence": 0.97
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "TreatmentAdministration",
+      "target": "TreatmentAdministration",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "administeredAt",
+          "target": "administeredAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "agent",
+          "target": "agent",
+          "confidence": 0.97
+        },
+        {
+          "proto": "cumulativeDose",
+          "target": null,
+          "confidence": 0.8
+        },
+        {
+          "proto": "dose",
+          "target": "dose",
+          "confidence": 0.97
+        },
+        {
+          "proto": "doseUnit",
+          "target": "doseUnit",
+          "confidence": 0.97
+        },
+        {
+          "proto": "planId",
+          "target": "planId",
+          "confidence": 0.97
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "TreatmentPlan",
+      "target": "TreatmentPlan",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "createdAt",
+          "target": "createdAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "cycleCount",
+          "target": "cycleCount",
+          "confidence": 0.97
+        },
+        {
+          "proto": "endsAt",
+          "target": "endsAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "intent",
+          "target": "intent",
+          "confidence": 0.97
+        },
+        {
+          "proto": "pathwayId",
+          "target": "pathwayId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "patientId",
+          "target": "patientId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "regimen",
+          "target": "regimen",
+          "confidence": 0.97
+        },
+        {
+          "proto": "setting",
+          "target": "setting",
+          "confidence": 0.97
+        },
+        {
+          "proto": "startsAt",
+          "target": "startsAt",
+          "confidence": 0.97
+        },
+        {
+          "proto": "status",
+          "target": "status",
+          "confidence": 0.95
+        },
+        {
+          "proto": "title",
+          "target": null,
+          "confidence": 0.8
+        }
+      ],
+      "requiredRelations": []
+    },
+    {
+      "proto": "WearableReading",
+      "target": "WearableReading",
+      "confidence": 0.98,
+      "fields": [
+        {
+          "proto": "measuredOn",
+          "target": "measuredOn",
+          "confidence": 0.97
+        },
+        {
+          "proto": "metric",
+          "target": "metricType",
+          "confidence": 0.9
+        },
+        {
+          "proto": "patientId",
+          "target": "patientId",
+          "confidence": 0.97
+        },
+        {
+          "proto": "synthetic",
+          "target": null,
+          "confidence": 0.8
+        },
+        {
+          "proto": "value",
+          "target": "value",
+          "confidence": 0.97
+        }
+      ],
+      "requiredRelations": []
+    }
+  ],
+  "enumValueMap": {
+    "AdverseEvent.attribution": {
+      "Possibly related to fluid loss": null,
+      "Possibly related to steroids": null,
+      "Possibly related to treatment": "POSSIBLE",
+      "Probably related to chemotherapy": null,
+      "Probably related to treatment": "PROBABLE",
+      "Related to antiemetic medication": null,
+      "Related to chemotherapy": "DEFINITE",
+      "Under evaluation": null,
+      "Unlikely related to treatment": "UNLIKELY"
+    },
+    "CarePathwayStage.status": {
+      "completed": null,
+      "current": null,
+      "diagnosis": null,
+      "palliative care": null,
+      "planning": null,
+      "progression": null,
+      "remission": null,
+      "response assessment": null,
+      "screening": null,
+      "survivorship": null,
+      "treatment": null,
+      "upcoming": null
+    },
+    "CarePathwayTransition.status": {
+      "awaiting confirmation": "AWAITING_CONFIRMATION",
+      "confirmed": "CONFIRMED"
+    },
+    "CheckIn.status": {
+      "completed": "COMPLETED",
+      "scheduled": "SCHEDULED",
+      "skipped": "SKIPPED"
+    },
+    "ClinicalRecord.status": {
+      "conflicting": "CONFLICTING",
+      "unverified": "UNVERIFIED",
+      "verified": "VERIFIED"
+    },
+    "ConcordanceCheck.result": {
+      "concordant": "CONCORDANT",
+      "deviation": "DEVIATION_FOUND",
+      "insufficient data": "NOT_EVALUATED"
+    },
+    "DataRequest.audience": {
+      "clinician": "CLINICIAN",
+      "patient": "PATIENT"
+    },
+    "DataRequest.status": {
+      "answered": "ANSWERED",
+      "dismissed": "DISMISSED",
+      "open": "OPEN"
+    },
+    "Document.status": {
+      "confirmed": "CONFIRMED",
+      "extracted": "EXTRACTED",
+      "uploaded": "UPLOADED"
+    },
+    "FollowUp.status": {
+      "completed": "COMPLETED",
+      "overdue": "OVERDUE",
+      "scheduled": "SCHEDULED"
+    },
+    "PatientChatAnswer.status": {
+      "awaiting clinician review": "AWAITING_CLINICIAN_REVIEW",
+      "endorsed": "ENDORSED",
+      "available to a patient": null
+    },
+    "RoughPatchAlert.status": {
+      "acknowledged": "ACKNOWLEDGED",
+      "open": "OPEN",
+      "resolved": "RESOLVED"
+    },
+    "TreatmentPlan.status": {
+      "active": "ACTIVE",
+      "completed": "COMPLETED",
+      "draft": "DRAFT"
+    }
+  }
+}
