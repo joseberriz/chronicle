@@ -70,6 +70,17 @@ function Guarded_org_structure() {
   );
 }
 
+const LazyScreen_triage_settings = lazy(() => import('./presentation/containers/triage-settings.container'));
+function Guarded_triage_settings() {
+  return (
+    <AuthGuard loadingComponent={<LoadingFallback />} fallback={<Navigate to="/login" replace />}>
+      <Suspense fallback={<LoadingFallback />}>
+        <LazyScreen_triage_settings />
+      </Suspense>
+    </AuthGuard>
+  );
+}
+
 const LazyScreen_user_detail = lazy(() => import('./presentation/views/user-detail.view'));
 function Guarded_user_detail() {
   return (
@@ -640,6 +651,18 @@ export const routes: AppRoute[] = [
     order: null,
     visibility: null,
     Component: Guarded_org_structure,
+    ErrorBoundary: ErrorBoundary,
+  },
+  {
+    slug: "triage-settings",
+    path: "/triage-settings",
+    handle: { surface: "clinician-workspace", frame: "desktop" },
+    layoutType: "dashboard",
+    name: "Triage Settings",
+    icon: null,
+    order: null,
+    visibility: null,
+    Component: Guarded_triage_settings,
     ErrorBoundary: ErrorBoundary,
   },
   {

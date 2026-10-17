@@ -31,6 +31,10 @@ const ROUTES: readonly { readonly path: string; readonly surface: string }[] = [
     "surface": "clinician-workspace"
   },
   {
+    "path": "/triage-settings",
+    "surface": "clinician-workspace"
+  },
+  {
     "path": "/user-detail",
     "surface": "clinician-workspace"
   },

@@ -25,6 +25,7 @@ import type { DataRequestRepository } from '../domain/ports/dataRequest.reposito
 import type { DeviationRepository } from '../domain/ports/deviation.repository';
 import type { DocumentRepository } from '../domain/ports/document.repository';
 import type { EndorsedAnswerRepository } from '../domain/ports/endorsedAnswer.repository';
+import type { TriageRuleRepository } from '../domain/ports/triageRule.repository';
 import type { ExtractedFieldRepository } from '../domain/ports/extractedField.repository';
 import type { FollowUpRepository } from '../domain/ports/followUp.repository';
 import type { FrameContractItemRepository } from '../domain/ports/frameContractItem.repository';
@@ -68,6 +69,7 @@ export interface Repositories {
   readonly deviation: DeviationRepository;
   readonly document: DocumentRepository;
   readonly endorsedAnswer: EndorsedAnswerRepository;
+  readonly triageRule: TriageRuleRepository;
   readonly extractedField: ExtractedFieldRepository;
   readonly followUp: FollowUpRepository;
   readonly frameContractItem: FrameContractItemRepository;

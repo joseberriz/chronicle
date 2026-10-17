@@ -26,6 +26,7 @@ import { ArchieDataRequestRepository } from '../infrastructure/archie/dataReques
 import { ArchieDeviationRepository } from '../infrastructure/archie/deviation.adapter';
 import { ArchieDocumentRepository } from '../infrastructure/archie/document.adapter';
 import { ArchieEndorsedAnswerRepository } from '../infrastructure/archie/endorsedAnswer.adapter';
+import { ArchieTriageRuleRepository } from '../infrastructure/archie/triageRule.adapter';
 import { ArchieExtractedFieldRepository } from '../infrastructure/archie/extractedField.adapter';
 import { ArchieFollowUpRepository } from '../infrastructure/archie/followUp.adapter';
 import { ArchieFrameContractItemRepository } from '../infrastructure/archie/frameContractItem.adapter';
@@ -104,6 +105,7 @@ export function createRepositories(gql: IGraphQLModule): Repositories {
     symptomLog: new ArchieSymptomLogRepository(gql),
     treatmentAdministration: new ArchieTreatmentAdministrationRepository(gql),
     treatmentPlan: new ArchieTreatmentPlanRepository(gql),
+    triageRule: new ArchieTriageRuleRepository(gql),
     user: new ArchieUserRepository(gql),
     userActivity: new ArchieUserActivityRepository(gql),
     wearableReading: new ArchieWearableReadingRepository(gql),

@@ -168,6 +168,14 @@ const SURFACES: Readonly<Record<string, SurfaceData>> = {
           "icon": "LayoutDashboard"
         },
         {
+          "slug": "triage-settings",
+          "href": "/triage-settings",
+          "label": "Triage Settings",
+          "order": 2,
+          "group": "Management",
+          "icon": "ShieldAlert"
+        },
+        {
           "slug": "users",
           "href": "/users",
           "label": "Users",
@@ -1166,6 +1174,11 @@ const ROUTES: readonly { readonly path: string; readonly slug: string; readonly 
   {
     "path": "/org-structure",
     "slug": "org-structure",
+    "surface": "clinician-workspace"
+  },
+  {
+    "path": "/triage-settings",
+    "slug": "triage-settings",
     "surface": "clinician-workspace"
   },
   {

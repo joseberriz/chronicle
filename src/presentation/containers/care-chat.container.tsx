@@ -19,6 +19,7 @@ import {
   type CareChatThreadItem,
 } from '../../application/view-models/care-chat.vm';
 import type { PatientQuestionRedFlag } from '../../domain/entities/patientQuestion';
+import { triageText, type TriageRule } from '../../domain/ports/triageRule.repository';
 import { useRepositories } from '../app-context';
 import { CareChatView } from '../views/care-chat.view';
 import { ScreenError, ScreenLoading } from '../screen-state';
@@ -43,7 +44,25 @@ const QUESTIONS_PAGE_SIZE = 25;
 const URGENT_RE = /(fever|bleed|chest pain|short(ness)? of breath|can't breathe|cannot breathe|faint|confus|seizure|ibuprofen|unable to keep)/i;
 const PRIORITY_RE = /(pain|vomit|rash|swelling|dizz|numb|diarrh|infection)/i;
 
-function triage(text: string): { redFlag: PatientQuestionRedFlag; reason?: string } {
+/** Triage with the admin-configured rules; the built-in keywords are the fallback when none are configured. */
+function triage(
+  text: string,
+  rules: readonly TriageRule[],
+): { redFlag: PatientQuestionRedFlag; reason?: string; alert: boolean } {
+  if (rules.some((r) => r.active)) {
+    const t = triageText(text, rules);
+    if (t.matched === null) return { redFlag: 'ROUTINE', alert: false };
+    return {
+      redFlag: t.level,
+      reason: (t.level === 'URGENT' ? 'Red-flag term: ' : 'Symptom term: ') + t.matched.keyword,
+      alert: t.alertNavigator,
+    };
+  }
+  const legacy = legacyTriage(text);
+  return { ...legacy, alert: legacy.redFlag === 'URGENT' };
+}
+
+function legacyTriage(text: string): { redFlag: PatientQuestionRedFlag; reason?: string } {
   const urgent = URGENT_RE.exec(text);
   if (urgent !== null) return { redFlag: 'URGENT', reason: 'Red-flag term: ' + urgent[0].toLowerCase() };
   const priority = PRIORITY_RE.exec(text);
@@ -82,6 +101,17 @@ export function CareChatScreenContainer(
   const [questionsNotice, setQuestionsNotice] = React.useState<DataNotice | null>(null);
   const [thread, setThread] = React.useState<readonly CareChatThreadItem[]>([]);
   const [patientId, setPatientId] = React.useState<string | null>(null);
+  const [rules, setRules] = React.useState<readonly TriageRule[]>([]);
+
+  React.useEffect(() => {
+    let live = true;
+    void repositories.triageRule.listAll().then((r) => {
+      if (live && r.ok === true) setRules(r.data);
+    });
+    return () => {
+      live = false;
+    };
+  }, [repositories]);
   const [loading, setLoading] = React.useState(true);
   const [loadError, setLoadError] = React.useState<RepoError | null>(null);
   const [reloadToken, setReloadToken] = React.useState(0);
@@ -233,7 +263,7 @@ export function CareChatScreenContainer(
     async (raw: string): Promise<void> => {
       const text = raw.trim();
       if (patientId === null || text.length === 0) return;
-      const { redFlag, reason } = triage(text);
+      const { redFlag, reason, alert } = triage(text, rules);
       const lower = text.toLowerCase();
       const match = library.find((e) =>
         e.topic
@@ -247,7 +277,7 @@ export function CareChatScreenContainer(
         redFlag,
         ...(reason !== undefined ? { redFlagReason: reason } : {}),
         ...(match !== undefined ? { matchedAnswerId: match.id } : {}),
-        navigatorAlerted: redFlag === 'URGENT',
+        navigatorAlerted: alert,
         askedAt: new Date().toISOString(),
       });
       if (created === null || created.ok === false) {
@@ -266,7 +296,7 @@ export function CareChatScreenContainer(
       }
       reload();
     },
-    [patientId, library, repositories, reload],
+    [patientId, library, repositories, reload, rules],
   );
 
   const onAnswersPageChange = React.useCallback((page: number): void => {
