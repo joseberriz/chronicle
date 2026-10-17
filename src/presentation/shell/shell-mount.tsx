@@ -12,6 +12,7 @@ import { ClinicianWorkspaceShellContainer } from './clinician-workspace.shell-co
 import { InsightsShellContainer } from './insights.shell-container';
 import { PatientAppShellContainer } from './patient-app.shell-container';
 import { PatientPathwayShellContainer } from './patient-pathway.shell-container';
+import { RoleSwitcher } from './role-switcher';
 
 type ShellOf = ComponentType<{ readonly children: ReactNode }>;
 
@@ -221,5 +222,10 @@ export function ShellMount({ children }: { readonly children: ReactNode }) {
   const { pathname } = useLocation();
   const surface = surfaceOf(pathname);
   const Shell = surface === undefined ? undefined : SHELL_OF_SURFACE[surface];
-  return Shell === undefined ? <>{children}</> : <Shell>{children}</Shell>;
+  return (
+    <>
+      {Shell === undefined ? <>{children}</> : <Shell>{children}</Shell>}
+      {surface === 'auth' ? null : <RoleSwitcher />}
+    </>
+  );
 }
