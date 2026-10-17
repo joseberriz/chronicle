@@ -13,12 +13,14 @@ import { routes } from '@/presentation/navigation';
 import { useAppNavigate } from '@/presentation/navigation';
 import type { RepoError } from '../../domain/shared';
 import type { Clinician } from '../../domain/entities/clinician';
+import type { Patient } from '../../domain/entities/patient';
 import type { PatientChatAnswer, PatientChatAnswerId } from '../../domain/entities/patientChatAnswer';
 import type { PatientQuestion } from '../../domain/entities/patientQuestion';
 import type { UpdatePatientChatAnswer } from '../../domain/ports/patientChatAnswer.repository';
 import type { DataNotice } from '../../application/view-models/notices';
 import { reviewQueueScreenViewModelAvailability, type ReviewQueueScreenViewModel } from '../../application/view-models/review-queue.vm';
-import { useRepositories } from '../app-context';
+import { endorseAnswer, promoteAnswerToLibrary, rejectAnswer, saveAnswerEdits } from '../../application/use-cases/review-answer';
+import { useIdentity, useRepositories } from '../app-context';
 import { ReviewQueueView } from '../views/review-queue.view';
 import { ScreenError, ScreenLoading } from '../screen-state';
 
@@ -47,6 +49,10 @@ export function ReviewQueueScreenContainer(
   const View = props.view;
   const repositories = useRepositories();
   const navigate = useAppNavigate();
+  const { identity } = useIdentity();
+  const reviewerEmail = identity?.email.trim().toLowerCase() ?? null;
+  const [reviewer, setReviewer] = React.useState<Clinician | null>(null);
+  const [Patient, setPatient] = React.useState<readonly Patient[]>([]);
   // No bridgeable principal on the wire: the principal is a CONSTANT null (fail closed, no session query).
   const principal = null;
   const principalNotice: DataNotice | null = { code: 'sesion-no-identificada' };
@@ -85,9 +91,14 @@ export function ReviewQueueScreenContainer(
       repositories.clinician.listAll(),
       repositories.patientChatAnswer.listAll(),
       repositories.patientQuestion.listAll(),
+      repositories.patient.listAll(),
+      reviewerEmail === null ? null : repositories.clinician.list({ filter: { email: reviewerEmail }, first: 1 }),
     ])
-    .then(([ClinicianResult, PatientChatAnswerResult, PatientQuestionResult]) => {
+    .then(([ClinicianResult, PatientChatAnswerResult, PatientQuestionResult, PatientResult, ReviewerResult]) => {
       if (!live) return;
+      // Patients and the reviewer are supporting rows: a failure there degrades to "unknown", never blanks the queue.
+      setPatient(PatientResult.ok ? PatientResult.data.items : []);
+      setReviewer(ReviewerResult !== null && ReviewerResult.ok ? (ReviewerResult.data.items[0] ?? null) : null);
       if (ClinicianResult === null) {
         setClinician([]);
         setClinicianTruncatedCap(null);
@@ -169,10 +180,10 @@ export function ReviewQueueScreenContainer(
     return () => {
       live = false;
     };
-  }, [repositories, reloadToken]);
+  }, [repositories, reloadToken, reviewerEmail]);
 
   const onUpdatePatientChatAnswer = React.useCallback(
-    (id: PatientChatAnswerId, patch: Pick<UpdatePatientChatAnswer, 'promotedToLibrary' | 'reviewedAt' | 'reviewedById' | 'reviewerEdits' | 'status'>): void => {
+    (id: PatientChatAnswerId, patch: Pick<UpdatePatientChatAnswer, 'body' | 'promotedToLibrary' | 'reviewedAt' | 'reviewedById' | 'reviewerEdits' | 'status'>): void => {
       setWriteError(null);
       void repositories.patientChatAnswer
         .update(id, patch)
@@ -199,6 +210,66 @@ export function ReviewQueueScreenContainer(
     [repositories, reload],
   );
 
+  /** Every review write funnels through here: one error channel, one reload. */
+  const runWrite = React.useCallback(
+    (write: () => Promise<{ ok: true } | { ok: false; error: RepoError }>): void => {
+      setWriteError(null);
+      void write()
+        .then((result) => {
+          if (result.ok === false) {
+            setWriteError(result.error);
+            return;
+          }
+          reload();
+        })
+        .catch((cause: unknown) => {
+          console.error('[archie] la escritura falló fuera del contrato `RepoResult`:', cause);
+          setWriteError({
+            kind: 'transport',
+            message: 'La escritura falló de una forma que el transporte no supo normalizar.',
+            detail: 'promesa rechazada fuera del contrato `RepoResult`',
+          });
+        });
+    },
+    [reload],
+  );
+
+  const onEndorseAnswer = React.useCallback(
+    (id: PatientChatAnswerId, body?: string): void => {
+      runWrite(() => endorseAnswer(repositories.patientChatAnswer, { answerId: id, reviewerId: reviewer?.id, body }));
+    },
+    [repositories, reviewer, runWrite],
+  );
+
+  const onSaveAnswerEdits = React.useCallback(
+    (id: PatientChatAnswerId, body: string): void => {
+      runWrite(() => saveAnswerEdits(repositories.patientChatAnswer, id, body));
+    },
+    [repositories, runWrite],
+  );
+
+  const onRejectAnswer = React.useCallback(
+    (id: PatientChatAnswerId): void => {
+      runWrite(() => rejectAnswer(repositories.patientChatAnswer, id));
+    },
+    [repositories, runWrite],
+  );
+
+  const onPromoteAnswer = React.useCallback(
+    (id: PatientChatAnswerId): void => {
+      const answer = PatientChatAnswer.find((a) => a.id === id);
+      if (answer === undefined) return;
+      const question = PatientQuestion.find((q) => q.id === answer.questionId);
+      runWrite(() =>
+        promoteAnswerToLibrary(
+          { answers: repositories.patientChatAnswer, library: repositories.endorsedAnswer },
+          { answer, question, reviewerId: reviewer?.id },
+        ),
+      );
+    },
+    [repositories, reviewer, runWrite, PatientChatAnswer, PatientQuestion],
+  );
+
   const { t } = useTranslation();
   const vm: ReviewQueueScreenViewModel = {
     Clinician,
@@ -207,9 +278,15 @@ export function ReviewQueueScreenContainer(
     PatientChatAnswerNotice,
     PatientQuestion,
     PatientQuestionNotice,
+    Patient,
+    reviewer,
     loading,
     error: loadError ?? writeError,
     onUpdatePatientChatAnswer,
+    onEndorseAnswer,
+    onSaveAnswerEdits,
+    onRejectAnswer,
+    onPromoteAnswer,
     availability: reviewQueueScreenViewModelAvailability,
     navigate,
     href,

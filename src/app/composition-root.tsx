@@ -50,6 +50,8 @@ import { ArchieTreatmentPlanRepository } from '../infrastructure/archie/treatmen
 import { ArchieUserRepository } from '../infrastructure/archie/user.adapter';
 import { ArchieUserActivityRepository } from '../infrastructure/archie/userActivity.adapter';
 import { ArchieWearableReadingRepository } from '../infrastructure/archie/wearableReading.adapter';
+import { AnswerDrafterProvider } from '../presentation/answer-drafter-context';
+import { createAnswerDrafter } from '../infrastructure/llm';
 import {
   AuthProvider,
   IdentityProvider,
@@ -118,6 +120,15 @@ export function AppProviders(props: {
   const repositories = React.useMemo(() => createRepositories(client.graphql), [client]);
   const auth = useArchieAuth();
   const { identity, pending } = useArchieIdentity();
+  const drafter = React.useMemo(
+    () =>
+      createAnswerDrafter({
+        apiUrl: import.meta.env.VITE_LLM_API_URL as string | undefined,
+        apiKey: import.meta.env.VITE_LLM_API_KEY as string | undefined,
+        model: import.meta.env.VITE_LLM_MODEL as string | undefined,
+      }),
+    [],
+  );
   // Los `children` viajan DENTRO del objeto de props, no como tercer argumento: el tipo
   // del provider los declara REQUERIDOS y `createElement` typechequea el segundo argumento contra
   // ese tipo — con los hijos por fuera es TS2769 ("Property 'children' is missing"), que el barrido
@@ -129,7 +140,7 @@ export function AppProviders(props: {
       children: React.createElement(IdentityProvider, {
         identity,
         pending,
-        children: props.children,
+        children: React.createElement(AnswerDrafterProvider, { drafter, children: props.children }),
       }),
     }),
   });

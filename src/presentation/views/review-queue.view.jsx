@@ -20,10 +20,12 @@ import { useTranslation } from "react-i18next";
 const STATUS_OPTIONS = [
   ["awaiting clinician review", "Awaiting clinician review"],
   ["endorsed", "Endorsed"],
-  ["available to a patient", "Available to a patient"],
-  ["rejected", "Rejected"],
   ["all", "All statuses"],
 ];
+
+/** The backend's `PatientChatAnswer.status` in the prototype's vocabulary the filters and stages use. */
+const STATUS_LABEL = { AWAITING_CLINICIAN_REVIEW: "awaiting clinician review", ENDORSED: "endorsed" };
+const isAiDraft = (a) => a?.aiDrafted === "AI_DRAFT";
 
 function TriageMark({ urgent }) {
   const { t } = useTranslation();
@@ -39,7 +41,7 @@ function TriageMark({ urgent }) {
 
 /** @param {import("@/application/view-models/review-queue.vm").ReviewQueueScreenViewModel} props */
 export function ReviewQueueView(props) {
-  const { PatientQuestion, PatientChatAnswer, Clinician, href } = props;
+  const { PatientQuestion, PatientChatAnswer, Clinician, Patient, href } = props;
   const { t } = useTranslation();
   const [selectedId, setSelectedId] = useState(null);
   const [status, setStatus] = useState("awaiting clinician review");
@@ -50,32 +52,32 @@ export function ReviewQueueView(props) {
   const [draftText, setDraftText] = useState("");
   const [message, setMessage] = useState("");
 
+  const isUrgent = (q) => q?.redFlag === "URGENT";
   const all = PatientChatAnswer.map((a) => {
     const q = PatientQuestion.find((x) => x.id === a.questionId);
-    const p = props.principal;
-    const d = {};
+    const p = Patient.find((x) => x.id === q?.patientId) ?? null;
     return {
       ...a,
       q,
-      patientName: p?.fullName ?? "Unknown patient",
+      urgent: isUrgent(q),
+      patientName: p?.fullName ?? t('review-queue.unknown-patient'),
       patientId: p?.id,
-      key: d.rejected ? "rejected" : (d.status ?? a.status),
-      decided: Boolean(d.status || d.rejected),
-      promoted: a.promotedToLibrary || Boolean(d.promoted),
-      finalText: d.text ?? a.reviewerEdits ?? null,
+      key: STATUS_LABEL[a.status] ?? a.status,
+      decided: a.status === "ENDORSED",
+      promoted: a.promotedToLibrary,
       reviewer: Clinician.find((c) => c.id === a.reviewedById),
     };
-  }).sort((x, y) => Number(Boolean(y.q?.redFlag)) - Number(Boolean(x.q?.redFlag)) || (y.q?.askedAt ?? "").localeCompare(x.q?.askedAt ?? ""));
+  }).sort((x, y) => Number(y.urgent) - Number(x.urgent) || (y.q?.askedAt ?? "").localeCompare(x.q?.askedAt ?? ""));
 
   const awaiting = all.filter((r) => enumIs(r.key, "awaiting clinician review"));
-  const aiPending = awaiting.filter((r) => r.aiDrafted).length;
-  const urgentCount = awaiting.filter((r) => r.q?.redFlag).length;
+  const aiPending = awaiting.filter((r) => isAiDraft(r)).length;
+  const urgentCount = awaiting.filter((r) => r.urgent).length;
 
   const needle = query.trim().toLowerCase();
   const rows = all.filter((r) =>
     (status === "all" || r.key === status) &&
-    (triage === "all" || (triage === "urgent") === Boolean(r.q?.redFlag)) &&
-    (source === "all" || (source === "ai") === Boolean(r.aiDrafted)) &&
+    (triage === "all" || (triage === "urgent") === r.urgent) &&
+    (source === "all" || (source === "ai") === isAiDraft(r)) &&
     (!needle || r.patientName.toLowerCase().includes(needle) || (r.q?.questionText ?? "").toLowerCase().includes(needle))
   );
   const selected = rows.find((r) => r.id === selectedId) ?? rows[0] ?? null;
@@ -83,26 +85,29 @@ export function ReviewQueueView(props) {
 
   const select = (id) => { setSelectedId(id); setEditing(false); setMessage(""); };
   const clear = () => { setStatus("awaiting clinician review"); setTriage("all"); setSource("all"); setQuery(""); };
-  const patch = (id, p) => props.onUpdatePatientChatAnswer(id, p);
-
   const approve = (r) => {
-    patch(r?.id, { status: "available to a patient", text: editing ? draftText : r?.finalText ?? undefined });
+    if (!r) return;
+    props.onEndorseAnswer(r.id, editing && draftText.trim() !== r.body ? draftText : undefined);
     setEditing(false);
-    setMessage("Answer approved. It is now available to the patient.");
+    setMessage(t('review-queue.msg-approved'));
   };
   const saveEdits = (r) => {
-    patch(r?.id, { text: draftText });
+    if (!r || draftText.trim() === "") return;
+    props.onSaveAnswerEdits(r.id, draftText);
     setEditing(false);
-    setMessage("Edits saved. Approve the answer to make your text available to the patient.");
+    setMessage(t('review-queue.msg-saved'));
   };
   const reject = (r) => {
-    patch(r?.id, { rejected: true });
+    if (!r) return;
+    props.onRejectAnswer(r.id);
     setEditing(false);
-    setMessage("Draft rejected. The patient will not see it, and the question stays with the care team.");
+    setSelectedId(null);
+    setMessage(t('review-queue.msg-rejected'));
   };
   const promote = (r) => {
-    patch(r?.id, { promoted: true });
-    setMessage("Answer promoted. Similar questions can now reuse it from the endorsed library.");
+    if (!r) return;
+    props.onPromoteAnswer(r.id);
+    setMessage(t('review-queue.msg-promoted'));
   };
 
   const counts = [
@@ -181,9 +186,7 @@ export function ReviewQueueView(props) {
               stage="key"
               stages={[
                 { value: "awaiting clinician review", label: t('review-queue.58232e1a'), exception: true },
-                { value: "endorsed", label: t('review-queue.57c68e0c') },
-                { value: "available to a patient", label: t('review-queue.52631dcc') },
-                { value: "rejected", label: t('review-queue.aea4a04a') },
+                { value: "endorsed", label: t('review-queue.52631dcc') },
               ]}
               label={t('review-queue.58e1db9a')}
               emptyLabel="No answers are waiting for review."
@@ -199,11 +202,11 @@ export function ReviewQueueView(props) {
                     <p data-vid="765d0208" className="type-eyebrow text-text-muted">{t('review-queue.e3540b9e')}</p>
                     <h2 data-vid="1612f372" className="type-section">{selected?.patientName}</h2>
                   </div>
-                  <TriageMark data-vid="0bf7bc2e" urgent={selected?.q?.redFlag} />
+                  <TriageMark data-vid="0bf7bc2e" urgent={selected?.urgent} />
                 </div>
                 <p data-vid="af01364f" className="type-body text-text-body">{selected?.q?.questionText}</p>
                 <p data-vid="5a014693" className="type-caption tabular-nums text-text-muted">{t('review-queue.821c038b')} <span data-vid="491bb944" className="type-mono-id">{formatDateTime(selected?.q?.askedAt)}</span></p>
-                {selected?.q?.redFlag && selected?.q?.redFlagReason && (
+                {selected?.q?.redFlagReason && (
                   <p data-vid="9bfdaa29" className="type-meta rounded-md border border-status-danger bg-status-danger-bg p-3 text-status-danger-ink">
                     {t('review-queue.8ef092d2')} {selected?.q.redFlagReason}
                   </p>
@@ -219,21 +222,15 @@ export function ReviewQueueView(props) {
               <section data-vid="7f6e80b5" aria-label={t('review-queue.ebf12ef4')} className="flex flex-col gap-(--component-gap) rounded-card border border-border bg-card p-(--card-padding)">
                 <div data-vid="696ef747" className="flex flex-wrap items-center justify-between gap-2">
                   <h2 data-vid="7818b782" className="type-card-title inline-flex items-center gap-2">
-                    {selected?.aiDrafted ? <Sparkles data-vid="3bb7d8e7" className="size-4" aria-hidden="true" /> : <Library data-vid="e7962101" className="size-4" aria-hidden="true" />}
-                    {selected?.aiDrafted ? t('review-queue.923ff8a3.h2') : t('review-queue.17b0da60')}
+                    {isAiDraft(selected) ? <Sparkles data-vid="3bb7d8e7" className="size-4" aria-hidden="true" /> : <Library data-vid="e7962101" className="size-4" aria-hidden="true" />}
+                    {isAiDraft(selected) ? t('review-queue.923ff8a3.h2') : t('review-queue.17b0da60')}
                   </h2>
-                  {selected?.key === "rejected" ? <Badge data-vid="ce5a2861" variant="outline">{t('review-queue.adc39efb')}</Badge> : <StatusMark data-vid="69d55bc3" entity="PatientChatAnswer" status={selected?.key} />}
+                  {selected?.decided ? <Badge data-vid="ce5a2861" variant="outline">{t('review-queue.52631dcc')}</Badge> : <StatusMark data-vid="69d55bc3" entity="PatientChatAnswer" status={selected?.key} />}
                 </div>
                 <p data-vid="f5f8f445" className="type-caption text-text-muted">
                   {enumIs(selected?.key, "awaiting clinician review") ? t('review-queue.e831832f') : t('review-queue.63ddf910')}
                 </p>
-                <p data-vid="14d4ffeb" className="type-body whitespace-pre-line text-text-body">{selected?.body}</p>
-                {selected?.finalText && !editing && (
-                  <div data-vid="5e88a136" className="rounded-md bg-surface-sunken p-3">
-                    <p data-vid="2d7ac2fe" className="type-eyebrow text-text-muted">{t('review-queue.8608b93f.p')}</p>
-                    <p data-vid="00061546" className="type-body text-text-body">{selected?.finalText}</p>
-                  </div>
-                )}
+                {!editing && <p data-vid="14d4ffeb" className="type-body whitespace-pre-line text-text-body">{selected?.body}</p>}
                 {editing && (
                   <FieldGroup data-vid="6af681c6">
                     <Field data-vid="cddd9409">
@@ -243,7 +240,7 @@ export function ReviewQueueView(props) {
                     </Field>
                   </FieldGroup>
                 )}
-                {(selected?.reviewedAt || selected?.decided) && (
+                {selected?.decided && (
                   <p data-vid="4729c284" className="type-caption text-text-muted">
                     {selected?.reviewedAt
                       ? <>{t('review-queue.031cc202')} {selected?.reviewer?.fullName ?? t('review-queue.fa472233')} <span data-vid="7c2aea90" className="type-mono-id">{formatDateTime(selected?.reviewedAt)}</span></>
@@ -261,7 +258,7 @@ export function ReviewQueueView(props) {
                     </Button>
                   )}
                   {enumIs(selected?.key, "awaiting clinician review") && !editing && (
-                    <Button data-vid="973355d0" variant="outline" className="min-h-11 border-border-strong" onClick={() => { setDraftText(selected?.finalText ?? selected?.body); setEditing(true); setMessage(""); }}>
+                    <Button data-vid="973355d0" variant="outline" className="min-h-11 border-border-strong" onClick={() => { setDraftText(selected?.body ?? ""); setEditing(true); setMessage(""); }}>
                       <Pencil data-vid="26808004" className="size-4" aria-hidden="true" /> {t('review-queue.464c4ffd')}
                     </Button>
                   )}
@@ -275,7 +272,7 @@ export function ReviewQueueView(props) {
                       <X data-vid="60136a95" className="size-4" aria-hidden="true" /> {t('review-queue.ab604a36')}
                     </Button>
                   )}
-                  {(enumIs(selected?.key, "endorsed") || enumIs(selected?.key, "available to a patient")) && !selected?.promoted && (
+                  {selected?.decided && !selected?.promoted && (
                     <Button data-vid="78f87a76" variant="outline"                                                          className="min-h-11 border-border-strong" onClick={() => promote(selected)}>
                       <BookmarkPlus data-vid="a21bcb99" className="size-4" aria-hidden="true" /> {t('review-queue.cd1f78a7')}
                     </Button>
