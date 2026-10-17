@@ -125,14 +125,22 @@ export function PatientAppShell({ vm, children }) {
         <div data-vid="43af773f" className="flex min-w-0 flex-1 flex-col">
           <header data-vid="69c39e49"
             ref={headerRef}
-            className="sticky top-0 z-40 flex h-(--topbar-h) items-center gap-4 border-b border-chrome-border bg-chrome px-(--container-padding) text-chrome-foreground"
+            className="sticky top-0 z-40 flex h-(--topbar-h) items-center gap-2 border-b border-transparent bg-[oklch(0.27_0.07_255)] px-(--container-padding) text-white md:gap-4 [&_button]:text-white [&_button:hover]:bg-white/10"
           >
+            <button
+              type="button"
+              aria-label={t('patient-app.d47d7cb0')}
+              onClick={() => setMoreOpen(true)}
+              className={cn("flex size-11 shrink-0 items-center justify-center rounded-control text-white hover:bg-white/10 md:hidden", focusRing)}
+            >
+              <Menu aria-hidden="true" className="size-6" />
+            </button>
             <a data-vid="cd367c9a"
               href={homeHref}
               data-slot="brand"
               aria-label={name}
               className={cn(
-                "flex size-11 shrink-0 items-center justify-center rounded-control text-chrome-foreground md:hidden",
+                "flex size-9 shrink-0 items-center justify-center rounded-control text-white md:hidden",
                 focusRing
               )}
             >
