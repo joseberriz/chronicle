@@ -720,6 +720,13 @@ const SURFACES: Readonly<Record<string, SurfaceData>> = {
           "label": "Requests",
           "order": 7,
           "icon": "Inbox"
+        },
+        {
+          "slug": "my-treatment",
+          "href": "/my-treatment",
+          "label": "Treatment",
+          "order": 3,
+          "icon": "Clipboard"
         }
       ],
       "1bf880b9-da9e-4c0e-b38c-5fa91a33640b": [],
@@ -758,6 +765,13 @@ const SURFACES: Readonly<Record<string, SurfaceData>> = {
           "label": "Requests",
           "order": 7,
           "icon": "Inbox"
+        },
+        {
+          "slug": "my-treatment",
+          "href": "/my-treatment",
+          "label": "Treatment",
+          "order": 3,
+          "icon": "Clipboard"
         }
       ],
       "51ba4562-5ed7-4743-8be9-6e3bba0a4ed2": [],

@@ -26,7 +26,6 @@ import type { TreatmentPlan, TreatmentPlanStatus } from '../../domain/entities/t
 import type { NewTreatmentPlan, UpdateTreatmentPlan, TreatmentPlanQuery } from '../../domain/ports/treatmentPlan.repository';
 import { wireShapeViolation } from './mapping';
 import { toInt } from './coerce';
-import { repoError } from './transport';
 
 /** La FILA del wire de `TreatmentPlan`: lo que el documento selecciona, con la
  *  nulabilidad que el schema declara. No sale de esta capa. */
@@ -107,19 +106,6 @@ function filterValueToWire(key: string, value: unknown): unknown {
   return typeof value === 'string' ? valueToWire(table, value) : value;
 }
 
-/** Campos obligatorios del prototipo SIN columna en el wire: ninguna fila se puede
- *  leer como dominio. Constante decidida al emitir. */
-function requiredColumnAbsent(entity: string, fields: readonly string[]): RepoResult<never> {
-  return {
-    ok: false,
-    error: repoError(
-      'not-found',
-      entity + ': el prototipo exige ' + fields.join(', ') + ' y el wire no tiene columna para eso',
-      "campo-sin-columna",
-    ),
-  };
-}
-
 /** Los enums de `TreatmentPlan` cuyo dominio ES el enum del wire (ARCH-2242): por
  *  campo, el par prototipo → wire (`pairs`), los valores del wire (`values`) y los
  *  valores del prototipo SIN equivalente (`refused`). Quien escribe puede traer
@@ -181,7 +167,28 @@ export function toTreatmentPlan(row: TreatmentPlanRow): RepoResult<TreatmentPlan
       'la fila llegó null/undefined donde el schema garantiza un objeto',
     );
   }
-  return requiredColumnAbsent('TreatmentPlan', ["title"]);
+  const status = TREATMENT_PLAN_STATUS_VALUES.find((v) => v === row.status);
+  if (status === undefined) {
+    return wireShapeViolation('TreatmentPlan', 'status fuera del enum del wire: ' + String(row.status));
+  }
+  // The wire has no `title` column: the regimen name is the plan's honest title.
+  return {
+    ok: true,
+    data: {
+      id: row.id,
+      title: row.regimen,
+      patientId: row.patientId,
+      ...(row.pathwayId != null ? { pathwayId: row.pathwayId } : {}),
+      intent: valueFromWire(TREATMENT_PLAN_INTENT_FROM_WIRE, row.intent),
+      regimen: row.regimen,
+      ...(row.setting != null ? { setting: row.setting } : {}),
+      cycleCount: Number(row.cycleCount),
+      status,
+      ...(row.startsAt != null ? { startsAt: row.startsAt } : {}),
+      createdAt: row.createdAt,
+      ...(row.endsAt != null ? { endsAt: row.endsAt } : {}),
+    },
+  };
 }
 
 /** `NewTreatmentPlan` → el `TreatmentPlanCreateInput` real. El tipo de retorno es la

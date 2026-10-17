@@ -290,7 +290,7 @@ function Guarded_patient_app_notifications() {
   );
 }
 
-const LazyScreen_my_treatment = lazy(() => import('./presentation/views/my-treatment.view'));
+const LazyScreen_my_treatment = lazy(() => import('./presentation/containers/my-treatment.container'));
 function Guarded_my_treatment() {
   return (
     <AuthGuard loadingComponent={<LoadingFallback />} fallback={<Navigate to="/login" replace />}>
