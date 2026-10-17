@@ -54,7 +54,16 @@ export interface ReviewQueueScreenViewModel {
   readonly error: RepoError | null;
   /** Updates an existing `PatientChatAnswer`. The patch is partial by definition.
    *  Returns `void`. */
-  readonly onUpdatePatientChatAnswer: (id: PatientChatAnswerId, patch: Pick<UpdatePatientChatAnswer, 'promotedToLibrary' | 'reviewedAt' | 'reviewedById' | 'reviewerEdits' | 'status'>) => void;
+  readonly Patient: readonly Patient[];
+  /** The clinician record of the signed-in reviewer, or `null` when the session has none. */
+  readonly reviewer: Clinician | null;
+  readonly onUpdatePatientChatAnswer: (id: PatientChatAnswerId, patch: Pick<UpdatePatientChatAnswer, 'body' | 'promotedToLibrary' | 'reviewedAt' | 'reviewedById' | 'reviewerEdits' | 'status'>) => void;
+  /** Endorse the draft as the patient-visible reply; `body` carries the clinician's edits. */
+  readonly onEndorseAnswer: (id: PatientChatAnswerId, body?: string) => void;
+  readonly onSaveAnswerEdits: (id: PatientChatAnswerId, body: string) => void;
+  /** Reject = delete the draft; the question stays open for the care team. */
+  readonly onRejectAnswer: (id: PatientChatAnswerId) => void;
+  readonly onPromoteAnswer: (id: PatientChatAnswerId) => void;
   /** Static write availability: render disabled-with-reason from it, never guess. */
   readonly availability: ReviewQueueScreenViewModelAvailability;
   /** Navigates to another screen by route (`/slug`). The view never imports the

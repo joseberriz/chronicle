@@ -8,6 +8,7 @@ import type { RepoError } from '../../domain/shared';
 import type { Clinician } from '../../domain/entities/clinician';
 import type { EndorsedAnswer } from '../../domain/entities/endorsedAnswer';
 import type { PatientChatAnswer } from '../../domain/entities/patientChatAnswer';
+import type { Patient } from '../../domain/entities/patient';
 import type { PatientQuestion } from '../../domain/entities/patientQuestion';
 import type { DataNotice } from './notices';
 
@@ -17,12 +18,19 @@ import type { DataNotice } from './notices';
 /** Which writes the screen can actually perform, as DATA (the view renders a
  *  disabled control with its reason; V6 reads this). Static: it is decided at emit
  *  time. */
+/** Whether the patient can send a question: only when the session resolves to a `Patient`
+ *  record (the question needs a `patientId`). */
+export type CareChatWriteAvailability =
+  | { readonly available: true }
+  | { readonly available: false; readonly reason: 'escritura-no-disponible' | 'sesion-no-identificada' };
+
 export type CareChatScreenViewModelAvailability = {
-  readonly onCreatePatientQuestion: { readonly available: false; readonly reason: 'escritura-no-disponible' };
+  readonly onCreatePatientQuestion: CareChatWriteAvailability;
 };
-export const careChatScreenViewModelAvailability: CareChatScreenViewModelAvailability = {
-  onCreatePatientQuestion: { available: false, reason: 'escritura-no-disponible' },
-};
+
+/** Lifecycle of the last send: `sent-without-draft` means the question was stored but no draft
+ *  reply could be prepared (the care team answers by hand). */
+export type CareChatSubmitState = 'idle' | 'submitting' | 'sent' | 'sent-without-draft' | 'failed';
 
 export interface CareChatScreenViewModel {
   /** The rows of `PatientChatAnswer` this screen paints. The container fetches them;
@@ -91,6 +99,20 @@ export interface CareChatScreenViewModel {
   /** The load failure as a `RepoError`, or `null`. Distinguishes "backend down" from
    *  "no data". */
   readonly error: RepoError | null;
-  /** Static write availability: render disabled-with-reason from it, never guess. */
+  /** The signed-in patient, resolved by the session's email; `null` when none matches. */
+  readonly principal: Patient | null;
+  /** The patient's thread, newest first: each question with its clinician-endorsed reply (or
+   *  `null` while the draft is still under review — a draft is NEVER handed to the view). */
+  readonly thread: readonly CareChatThreadEntry[];
+  readonly onCreatePatientQuestion: (input: { readonly questionText: string }) => void;
+  readonly submitState: CareChatSubmitState;
+  readonly writeError: RepoError | null;
+  /** Write availability: render disabled-with-reason from it, never guess. */
   readonly availability: CareChatScreenViewModelAvailability;
+}
+
+export interface CareChatThreadEntry {
+  readonly question: PatientQuestion;
+  readonly reply: PatientChatAnswer | null;
+  readonly reviewerName: string | null;
 }

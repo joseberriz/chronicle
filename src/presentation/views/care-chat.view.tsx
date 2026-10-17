@@ -5,10 +5,10 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion, MotionConfig } from "@/vendor/motion";
-import { Search, Send } from "lucide-react";
+import { Search, Send, ShieldAlert } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { CareChatScreenViewModel } from "@/application/view-models/care-chat.vm";
-import { formatDate } from "@/lib/format";
+import { formatDate, formatDateTime } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -48,7 +48,9 @@ export function CareChatView(props: CareChatScreenViewModel): React.ReactElement
   const libraryMatchCount = filtered.length;
   const libraryTotalCount = props.library.length;
 
-  const createReason = reasonText(props.availability.onCreatePatientQuestion.reason);
+  const createReason = props.availability.onCreatePatientQuestion.available
+    ? ""
+    : reasonText(props.availability.onCreatePatientQuestion.reason);
 
   return (
     <MotionConfig reducedMotion="user">
@@ -61,10 +63,70 @@ export function CareChatView(props: CareChatScreenViewModel): React.ReactElement
 
           <section aria-labelledby="thread-h" className="flex flex-col gap-(--component-gap)">
             <h2 id="thread-h" className="type-section">{t("care-chat.e389fa62")}</h2>
-            <EmptyState
-              title={t("care-chat.e389fa62")}
-              description={t("_reason.escritura-no-disponible")}
-            />
+            {props.thread.length === 0 ? (
+              <EmptyState
+                title={t("care-chat.cf7a3267")}
+                description={props.availability.onCreatePatientQuestion.available ? t("care-chat.75999bb3") : createReason}
+              />
+            ) : (
+              <ol className="flex flex-col gap-(--component-gap)">
+                {props.thread.map(({ question: q, reply, reviewerName }) => (
+                  <li key={q.id} data-agent-entity="PatientQuestion" data-agent-row={q.id} className="flex flex-col gap-2">
+                    <div className="ml-8 flex flex-col gap-1 rounded-card bg-surface-sunken p-3">
+                      <p className="type-eyebrow text-text-muted">{t("care-chat.22ae3f97")}</p>
+                      <p className="type-body text-text-body" data-agent-field="questionText">{q.questionText}</p>
+                      <p className="type-caption tabular-nums text-text-muted">
+                        {t("care-chat.c16bc82b")} {formatDateTime(q.askedAt)}
+                      </p>
+                      {q.redFlag === "URGENT" && (
+                        <p className="type-meta inline-flex items-center gap-1 text-status-danger-ink">
+                          <ShieldAlert className="size-4" aria-hidden="true" /> {t("care-chat.1617b864")}
+                        </p>
+                      )}
+                    </div>
+                    <div className="mr-8 flex flex-col gap-1 rounded-card border border-border p-3">
+                      {reply ? (
+                        <>
+                          <p className="type-body whitespace-pre-line text-text-body" data-agent-field="body">{reply.body}</p>
+                          <p className="type-caption text-text-muted">
+                            {t("care-chat.c51d6c34")}
+                            {reviewerName ? ` · ${reviewerName}` : ""}
+                            {reply.reviewedAt ? ` · ${formatDate(reply.reviewedAt)}` : ""}
+                          </p>
+                        </>
+                      ) : (
+                        <p className="type-meta text-text-muted">{t("care-chat.24dfad71")}</p>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            )}
+            {props.questionsTotal > props.questionsPageSize && (
+              <div className="flex items-center justify-between gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={props.questionsPage === 0}
+                  onClick={() => props.onQuestionsPageChange(props.questionsPage - 1)}
+                >
+                  {t("care-chat.newer")}
+                </Button>
+                <span className="type-caption tabular-nums text-text-muted">
+                  {props.questionsPage + 1} {t("care-chat.28391d3b")} {Math.ceil(props.questionsTotal / props.questionsPageSize)}
+                </span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={(props.questionsPage + 1) * props.questionsPageSize >= props.questionsTotal}
+                  onClick={() => props.onQuestionsPageChange(props.questionsPage + 1)}
+                >
+                  {t("care-chat.older")}
+                </Button>
+              </div>
+            )}
           </section>
 
           <section
@@ -73,7 +135,8 @@ export function CareChatView(props: CareChatScreenViewModel): React.ReactElement
           >
             <h2 id="composer-h" className="type-card-title">{t("care-chat.2f2cf48a")}</h2>
             <form
-              onSubmit={form.handleSubmit(() => {
+              onSubmit={form.handleSubmit((values) => {
+                props.onCreatePatientQuestion({ questionText: values.questionText.trim() });
                 form.reset({ questionText: "" });
               })}
               noValidate
@@ -112,13 +175,26 @@ export function CareChatView(props: CareChatScreenViewModel): React.ReactElement
                 <Button
                   type="submit"
                   className="min-h-11 max-sm:w-full"
-                  disabled={!props.availability.onCreatePatientQuestion.available}
+                  disabled={!props.availability.onCreatePatientQuestion.available || props.submitState === "submitting"}
                 >
-                  <Send className="size-4" /> {t("care-chat.ec07ee9c")}
+                  <Send className="size-4" /> {props.submitState === "submitting" ? t("care-chat.sending") : t("care-chat.ec07ee9c")}
                 </Button>
               </div>
               {!props.availability.onCreatePatientQuestion.available && (
                 <p className="type-caption text-text-muted">{createReason}</p>
+              )}
+              {props.submitState === "sent" && (
+                <p role="status" className="type-meta rounded-control bg-status-success-bg p-3 text-status-success-ink">{t("care-chat.sent")}</p>
+              )}
+              {props.submitState === "sent-without-draft" && (
+                <p role="status" className="type-meta rounded-control bg-status-warning-bg p-3 text-status-warning-ink">{t("care-chat.sent-without-draft")}</p>
+              )}
+              {props.submitState === "failed" && (
+                <p role="alert" className="type-meta rounded-control bg-status-danger-bg p-3 text-status-danger-ink">
+                  {props.writeError?.kind === "unauthorized" || props.writeError?.kind === "forbidden" || props.writeError?.kind === "unidentified"
+                    ? t("_app.write-error.denied")
+                    : t("care-chat.send-failed")}
+                </p>
               )}
             </form>
           </section>

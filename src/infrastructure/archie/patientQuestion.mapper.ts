@@ -18,8 +18,7 @@
 import type { RepoResult } from '../../domain/shared';
 import type { PatientQuestion, PatientQuestionRedFlag } from '../../domain/entities/patientQuestion';
 import type { NewPatientQuestion, UpdatePatientQuestion, PatientQuestionQuery } from '../../domain/ports/patientQuestion.repository';
-import { wireShapeViolation } from './mapping';
-import { repoError } from './transport';
+import { assetUrls, narrow, outOfUnion, wireShapeViolation } from './mapping';
 
 /** La FILA del wire de `PatientQuestion`: lo que el documento selecciona, con la
  *  nulabilidad que el schema declara. No sale de esta capa. */
@@ -40,18 +39,6 @@ const PATIENT_QUESTION_RED_FLAG_VALUES: readonly PatientQuestionRedFlag[] = [
   'URGENT',
 ];
 
-/** Campos obligatorios del prototipo SIN columna en el wire: ninguna fila se puede
- *  leer como dominio. Constante decidida al emitir. */
-function requiredColumnAbsent(entity: string, fields: readonly string[]): RepoResult<never> {
-  return {
-    ok: false,
-    error: repoError(
-      'not-found',
-      entity + ': el prototipo exige ' + fields.join(', ') + ' y el wire no tiene columna para eso',
-      "campo-sin-columna",
-    ),
-  };
-}
 
 /** Los enums de `PatientQuestion` cuyo dominio ES el enum del wire (ARCH-2242): por
  *  campo, el par prototipo → wire (`pairs`), los valores del wire (`values`) y los
@@ -113,7 +100,27 @@ export function toPatientQuestion(row: PatientQuestionRow): RepoResult<PatientQu
       'la fila llegó null/undefined donde el schema garantiza un objeto',
     );
   }
-  return requiredColumnAbsent('PatientQuestion', ["navigatorAlerted"]);
+  const redFlag = narrow(PATIENT_QUESTION_RED_FLAG_VALUES, row.redFlag);
+  if (redFlag === undefined) {
+    return outOfUnion('PatientQuestion', 'redFlag', row.redFlag);
+  }
+  // `navigatorAlerted` has no column on the wire. The submit use case alerts the navigator for
+  // every URGENT question and for no other, so reading it back as `redFlag === 'URGENT'`
+  // reproduces what was written instead of refusing every row (`campo-sin-columna`).
+  return {
+    ok: true,
+    data: {
+      id: row.id,
+      questionText: assetUrls(row.questionText),
+      patientId: assetUrls(row.patientId),
+      redFlag,
+      redFlagReason: assetUrls(row.redFlagReason) ?? undefined,
+      matchedAnswerId: assetUrls(row.matchedAnswerId) ?? undefined,
+      navigatorAlerted: redFlag === 'URGENT',
+      askedAt: assetUrls(row.askedAt),
+      createdAt: assetUrls(row.createdAt),
+    },
+  };
 }
 
 /** `NewPatientQuestion` → el `PatientQuestionCreateInput` real. El tipo de retorno

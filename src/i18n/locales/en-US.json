@@ -160,7 +160,13 @@
     "e7f3dfd9": "Clear the search to see every approved answer, or send your question to the care team.",
     "e98ba88e": "Write your question",
     "ec07ee9c": "Send to care team",
-    "f07af455": "your care team"
+    "f07af455": "your care team",
+    "sending": "Sending…",
+    "sent": "Your question was sent. A clinician will review the reply before it appears here.",
+    "sent-without-draft": "Your question was sent. No draft reply could be prepared, so the care team will write one by hand.",
+    "send-failed": "We couldn't send your question. Please try again.",
+    "newer": "Newer",
+    "older": "Older"
   },
   "care-pathway-card": {
     "2e6ae054": "· follows",
@@ -1059,7 +1065,12 @@
     "e831832f": "Not confirmed. A clinician must review this before the patient sees it.",
     "ebf12ef4": "Draft",
     "fa472233": "a care team member",
-    "ff8059dc": "Actions"
+    "ff8059dc": "Actions",
+    "unknown-patient": "Unknown patient",
+    "msg-approved": "Answer approved. It is now available to the patient.",
+    "msg-saved": "Edits saved. Approve the answer to make your text available to the patient.",
+    "msg-rejected": "Draft rejected. The patient will not see it, and the question stays with the care team.",
+    "msg-promoted": "Answer promoted. Similar questions can now reuse it from the endorsed library."
   },
   "roster": {
     "18126156": "Risk score:",
