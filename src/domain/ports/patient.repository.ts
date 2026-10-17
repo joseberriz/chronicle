@@ -33,6 +33,7 @@ export interface PatientQuery {
       | 'careTeamId'
       | 'riskScore'
       | 'caregiverName'
+      | 'userId'
       | 'shareWithCaregiver'
       | 'createdAt'
     >

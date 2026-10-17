@@ -19,6 +19,8 @@ export interface Patient {
   careTeamId: string;
   riskScore?: number;
   caregiverName?: string;
+  /** The login (user account) this patient record belongs to, when linked. */
+  userId?: string;
   shareWithCaregiver: boolean;
   createdAt: string;
   /** relación a-uno → `OrgUnit` (nivel-1). Poblada sólo si el adapter la seleccionó. */

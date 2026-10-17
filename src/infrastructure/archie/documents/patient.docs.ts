@@ -25,6 +25,7 @@ export const PATIENT_LIST = `query Gen_Patient_List_g1($filter: PatientFilter, $
       primaryDiagnosis
       careTeamId
       riskScore
+      userId
       createdAt
     }
     totalCount

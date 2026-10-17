@@ -20,7 +20,7 @@ import {
 } from '../../application/view-models/care-chat.vm';
 import type { PatientQuestionRedFlag } from '../../domain/entities/patientQuestion';
 import { triageText, type TriageRule } from '../../domain/ports/triageRule.repository';
-import { useRepositories } from '../app-context';
+import { useIdentity, useRepositories } from '../app-context';
 import { CareChatView } from '../views/care-chat.view';
 import { ScreenError, ScreenLoading } from '../screen-state';
 
@@ -85,6 +85,7 @@ export function CareChatScreenContainer(
 ): React.ReactElement {
   const View = props.view;
   const repositories = useRepositories();
+  const { identity, pending: pendingIdentity } = useIdentity();
   const [answers, setAnswers] = React.useState<readonly PatientChatAnswer[]>([]);
   const [answersTotal, setAnswersTotal] = React.useState(0);
   const [answersPage, setAnswersPage] = React.useState(0);
@@ -205,12 +206,16 @@ export function CareChatScreenContainer(
     };
   }, [repositories, reloadToken, answersPage, cliniciansPage]);
 
-  // The patient's own thread. Until a login is linked to a patient record, the screen
-  // works on the first patient on file (demo scope).
+  // The patient's own thread: the patient record linked to the signed-in login. When no
+  // record is linked yet, fall back to the first patient on file (demo scope).
   React.useEffect(() => {
+    if (pendingIdentity) return;
     let live = true;
     void (async () => {
-      const patients = await repositories.patient.list({ first: 1 });
+      let patients = identity === null ? null : await repositories.patient.list({ first: 1, filter: { userId: identity.id } });
+      if (patients === null || patients.ok === false || patients.data.items.length === 0) {
+        patients = await repositories.patient.list({ first: 1 });
+      }
       if (!live) return;
       if (patients === null || patients.ok === false || patients.data.items.length === 0) {
         setPatientId(null);
@@ -257,7 +262,7 @@ export function CareChatScreenContainer(
     return () => {
       live = false;
     };
-  }, [repositories, reloadToken]);
+  }, [repositories, reloadToken, identity, pendingIdentity]);
 
   const onSubmitQuestion = React.useCallback(
     async (raw: string): Promise<void> => {

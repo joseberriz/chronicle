@@ -27,6 +27,7 @@ export interface PatientRow {
   primaryDiagnosis: string;
   careTeamId: string;
   riskScore: number | null;
+  userId?: string | null;
   createdAt: string;
 }
 
@@ -64,6 +65,7 @@ export function toPatient(row: PatientRow): RepoResult<Patient> {
       primaryDiagnosis: row.primaryDiagnosis,
       careTeamId: row.careTeamId,
       ...(row.riskScore != null ? { riskScore: Number(row.riskScore) } : {}),
+      ...(row.userId ? { userId: row.userId } : {}),
       shareWithCaregiver: false,
       createdAt: row.createdAt,
     },
