@@ -104,7 +104,7 @@ export function InsightsOverviewScreenContainer(
       repositories.metricDefinition.listAll(),
       repositories.orgUnit.listAll(),
       repositories.patient.listAll(),
-      repositories.treatmentPlan.listAll(),
+      repositories.treatmentPlan.listAll().catch(() => null),
     ])
     .then(([CarePathwayResult, CarePathwayStageResult, CarePathwayTransitionResult, ConcordanceCheckResult, MetricDefinitionResult, OrgUnitResult, PatientResult, TreatmentPlanResult]) => {
       if (!live) return;
@@ -247,7 +247,12 @@ export function InsightsOverviewScreenContainer(
         setTreatmentPlanNotice(null);
       } else {
         if (TreatmentPlanResult.ok === false) {
-          setLoadError(TreatmentPlanResult.error);
+          // Plans only map concordance checks to patients: a failure here
+          // must not blank the whole overview.
+          setTreatmentPlan([]);
+          setTreatmentPlanTruncatedCap(null);
+          setTreatmentPlanNotice(null);
+          hasLoadedRef.current = true;
           setLoading(false);
           return;
         }
